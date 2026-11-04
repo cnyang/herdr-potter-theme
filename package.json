@@ -1,0 +1,11 @@
+{
+  "name": "herdr-malfoid-theme",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "lint": "node scripts/lint.mjs",
+    "install-theme": "node scripts/install.mjs"
+  }
+}

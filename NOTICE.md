@@ -1,0 +1,28 @@
+# Sources and notices
+
+The four `mods/malfoid-*` modules and the layout are modified from the locally
+installed Traveler package, https://github.com/franky5440-afk/herdr-traveler.
+Traveler code is distributed under Apache-2.0; see `LICENSE`.
+Traveler chrome, spaces and tabs in turn derive from Herdr's built-in modules.
+Each modified entry point records its modification at the top of the file.
+
+Changes: GX10-derived emerald palette; Malfoid character/state art; academy room
+icons; native working-state pulse; compact agent rail; independent asset paths.
+Existing terminal, navigation, panel and Git query behavior is retained.
+
+The locally installed Traveler version predates the current upstream sprite
+implementation. No Traveler raster art is included in this package.
+
+`malfoid/` contains user-supplied reference images and videos. Those files and
+the generated character/background artwork are outside the code license.
+The character strip and academy background were created with the built-in
+imagegen tool using the supplied images as references; see `artwork/prompts.md`.
+No claim to third-party names, insignia or source-image rights is made here.
+
+The themed Files and Changes panels are modified copies of Herdr's built-in
+modules. The themed Inbox panel is a modified copy of the locally installed
+Traveler Inbox. The themed Git Graph is a modified copy of the locally installed
+https://github.com/rabeeh-ta/herdr-git-graph; it retains its upstream terms and
+bundled Lucide icon notice. These copies change asset paths and the panel root
+background only. Git Graph dialogs and shared settings continue to use the
+existing git-graph module. The original installed modules remain separate.

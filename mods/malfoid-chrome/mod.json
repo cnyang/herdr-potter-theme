@@ -1,0 +1,8 @@
+{
+  "place": "none",
+  "cloned_from": {
+    "name": "workspace-chrome",
+    "version": "0.1.11"
+  },
+  "title": "Malfoid Chrome"
+}

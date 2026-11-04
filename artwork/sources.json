@@ -1,0 +1,146 @@
+[
+  {
+    "path": "malfoid/奇幻女巫角色狀態素材表.png",
+    "sha256": "561d10ae9449785123de12e46b8ab05914fc8e6e0ea54bf449340e836da55193"
+  },
+  {
+    "path": "malfoid/849588186_17947215588356941_1398154726893359704_n.jpg",
+    "sha256": "7f9f9b76a18feffb06435bd86a527ed1cb0fcd57f3cc9e60b77f42e8dec8fab8"
+  },
+  {
+    "path": "malfoid/854914162_17965221030247356_7725255626878377497_n.jpg",
+    "sha256": "ed113200965ec2a2e7f1940f078c066ecba0c64734af1c47d9da4b592af4bade"
+  },
+  {
+    "path": "artwork/character-states-source.png",
+    "sha256": "be8e15b2b6d090cb5f45db9acd23ab4780ffb396c7e2c082a37ed5659ab90ba0"
+  },
+  {
+    "path": "mods/malfoid-chrome/academy.png",
+    "sha256": "cdcc4735a5ab2d5fb35178480a9a561286bb6193adb78a055166f4b1099a2b81"
+  },
+  {
+    "path": "mods/malfoid-chrome/sidebar.png",
+    "sha256": "ef1c93c12ad25ad2ca3538f158e60a8d166c4dcdff59f7909561af2bb7f06332"
+  },
+  {
+    "path": "malfoid/850131004_17947215624356941_9127338134038273054_n.jpg",
+    "sha256": "5b1fe3b02e22da2e49b422c72803883f376904733f6e13ef35f5f5b40cf9d7fd"
+  },
+  {
+    "path": "mods/malfoid-chrome/portrait-background-850131004.jpg",
+    "sha256": "5b1fe3b02e22da2e49b422c72803883f376904733f6e13ef35f5f5b40cf9d7fd"
+  },
+  {
+    "path": "artwork/portrait-background-right.svg",
+    "sha256": "81ffd72bd21098d1bc5b8e4f0645fa22184d71cd1642da67c5a92c27d263e739"
+  },
+  {
+    "path": "mods/malfoid-chrome/portrait-background-right.png",
+    "sha256": "31389d8c056a610ac380cff2c971baef761e06f9146c957da04dc200e54f7ffc"
+  },
+  {
+    "path": "malfoid/847859659_17987917251115575_7788327270819485292_n.jpg",
+    "sha256": "3015af56a1f402dce338b4e679f94643699c521ca601c68a4d7b0355918866cd"
+  },
+  {
+    "path": "malfoid/848598520_17947215642356941_6059244133180508283_n.jpg",
+    "sha256": "ee7e524978dd14dc71845160aaf5643c8bd7edd4b2e7d5b59946bcbb1f65847b"
+  },
+  {
+    "path": "mods/malfoid-tabs/art/portrait-01.png",
+    "sha256": "b320831ac4bb11ff89e6eb4e4e062bab0a71cf5b418c0c9b900db168ef1febe3"
+  },
+  {
+    "path": "mods/malfoid-tabs/art/portrait-02.png",
+    "sha256": "6908fc7fd1c767ce74e7998d7336155f276a5cd1af60dc45b5824e0798e5be07"
+  },
+  {
+    "path": "mods/malfoid-tabs/art/portrait-03.png",
+    "sha256": "7e95fa6d227afe134198b13f8317a77185e1e6fccab4b98b0e51f8bddfacc2c9"
+  },
+  {
+    "path": "mods/malfoid-tabs/art/portrait-04.png",
+    "sha256": "e48c6e1a9a513b88469a6d2913f8b11014642707d82caaad459e7d297cade5a3"
+  },
+  {
+    "path": "mods/malfoid-tabs/art/portrait-05.png",
+    "sha256": "56d05c4a3cbba933ebb23442e9714bdb56d429b8ff757ed10763d3bcb4ce57cc"
+  },
+  {
+    "path": "mods/malfoid-tabs/art/portrait-06.png",
+    "sha256": "84dfe12e0a5feb157b4aa7aeb5e3d035d191a21fa23ca8be220d97f75a60ecfc"
+  },
+  {
+    "path": "mods/malfoid-tabs/art/portrait-07.png",
+    "sha256": "0cc4dde766c6e755a99ad1dbc4437705abd8373e4984fc6cce6f076f60356594"
+  },
+  {
+    "path": "mods/malfoid-tabs/art/portrait-08.png",
+    "sha256": "5272a1d5f607ea2f8e774b4980c3c7b745af9806e8555c9a7690e8cd0538766e"
+  },
+  {
+    "path": "mods/malfoid-tabs/art/portrait-09.png",
+    "sha256": "64303c7bafdf4773bbec59a06e513228c14675e91c339ff9231ef8bbe9631cde"
+  },
+  {
+    "path": "mods/malfoid-tabs/art/portrait-10.png",
+    "sha256": "607a5922a4c260ba273afd2630442f178fc70187ebb4d338f2ca7a4aea0fca39"
+  },
+  {
+    "path": "malfoid/gothic-hallway-background.png",
+    "sha256": "dbd8cfc18eaba05c9fe93ddcfb23bfef32228fbc8a496231a2f2760f4b097cca"
+  },
+  {
+    "path": "mods/malfoid-chrome/hallway-background-v2.png",
+    "sha256": "dbd8cfc18eaba05c9fe93ddcfb23bfef32228fbc8a496231a2f2760f4b097cca"
+  },
+  {
+    "path": "artwork/working-poses-source.png",
+    "sha256": "a19dc42251b3c8d23b9cd0cceca7e1c0c8032bfcabe8010b7c33a33babec89bf"
+  },
+  {
+    "path": "artwork/working-poses/potion.png",
+    "sha256": "48520437a22512b4901a1c72f2fad97ce67ba81444a4bc2ef25fd7b7543a446f"
+  },
+  {
+    "path": "artwork/working-poses/reading.png",
+    "sha256": "95a10b1cd929ed22b77e2039647b8a348d5894b3114f668c1df1990256d3df65"
+  },
+  {
+    "path": "artwork/working-poses/writing.png",
+    "sha256": "c495f0a53425f528cab0ee6eba33da1374fedc45629a0999a0e75e4e465495d7"
+  },
+  {
+    "path": "mods/malfoid-agents/states/working-actions-v2.gif",
+    "sha256": "943c4027aaca011b570217c05f779b8e6156fa9186a58e590d4575b51525799f"
+  },
+  {
+    "path": "malfoid/four-house-crests.png",
+    "sha256": "4d2e54fb977399c116fe5498ffb3042517d3af22b02ab7fc3a671793fc6716d5"
+  },
+  {
+    "path": "mods/malfoid-spaces/art/gryffindor.png",
+    "sha256": "a756e278fc5549843ec7a048c59ad25b62fe75f42c04930d6ba10e2a1bb786eb"
+  },
+  {
+    "path": "mods/malfoid-spaces/art/slytherin.png",
+    "sha256": "48caeeeef8e42ca6b7799e9e87641a2f223c0de04dd6a96f51598bb337bd3b3b"
+  },
+  {
+    "path": "mods/malfoid-spaces/art/ravenclaw.png",
+    "sha256": "53e83eb4c7628d8720a76475a807a66edfcfd2a63765196e12ea242cf4cecc97"
+  },
+  {
+    "path": "mods/malfoid-spaces/art/hufflepuff.png",
+    "sha256": "29f28cd49f6cfe3a906960f836635a1534b2fb12abed92a57271753b22c5fcc9"
+  },
+  {
+    "path": "artwork/hogwarts-header-source.png",
+    "sha256": "66faeaef1f2e241e1391c28aa29fef62126225ecef772cb5cc1e577c569a3587"
+  },
+  {
+    "path": "mods/malfoid-chrome/hogwarts-crest.png",
+    "sha256": "b1df5748ef74a374c7f80d11d2619e8d6e3eb3a889055e4950449f5ac1886d78"
+  }
+]
