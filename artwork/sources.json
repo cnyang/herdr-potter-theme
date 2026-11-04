@@ -112,8 +112,12 @@
     "sha256": "c495f0a53425f528cab0ee6eba33da1374fedc45629a0999a0e75e4e465495d7"
   },
   {
-    "path": "mods/malfoid-agents/states/working-actions-v2.gif",
-    "sha256": "943c4027aaca011b570217c05f779b8e6156fa9186a58e590d4575b51525799f"
+    "path": "mods/malfoid-agents/states/working-potion.png",
+    "sha256": "5ebb5b419bae5b0324df1f29d55ce9f0a318b3dbc11482c9ac09dda14da58f87"
+  },
+  {
+    "path": "mods/malfoid-agents/states/working-reading.png",
+    "sha256": "24c6445a94ad2d754d68ea407e444b8bb6fc49ff878a2533e8332602509bae81"
   },
   {
     "path": "malfoid/four-house-crests.png",

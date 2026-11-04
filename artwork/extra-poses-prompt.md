@@ -2,7 +2,7 @@
 
 使用內建 imagegen；參考 `artwork/character-states-source.png`。
 生成 `artwork/working-poses-source.png`，1881×836，三格各 627×836，依序為翻書、寫筆記、調製魔藥。
-與原有施法圖組成 `mods/malfoid-agents/states/working-actions-v2.gif`，216×288、四格各 3 秒、無限循環。
+`potion.png`、`reading.png` 縮為 543×724，存成 `mods/malfoid-agents/states/working-potion.png`、`working-reading.png`，與原有施法圖輪替；`writing.png` 目前未使用。
 
 ## Prompt
 

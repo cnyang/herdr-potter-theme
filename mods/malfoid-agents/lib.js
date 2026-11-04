@@ -5,10 +5,35 @@ export function stateFor(status) {
   return STATES.includes(status) ? status : "idle";
 }
 
-export function spritePath(status) {
+const STATUS = { blocked: "等待指示", done: "已完成", idle: "休息中" };
+
+// 工作中輪替三種動作。文字與圖由同一個時間算出，兩者才不會錯開。
+export const ACTION_MS = 3000;
+export const TICK_MS = 1000;
+const WORKING_ACTIONS = [
+  { text: "施法中", sprite: "working" },
+  { text: "製魔藥", sprite: "working-potion" },
+  { text: "閱讀咒語", sprite: "working-reading" },
+];
+
+function actionAt(ms) {
+  return WORKING_ACTIONS[Math.floor(ms / ACTION_MS) % WORKING_ACTIONS.length];
+}
+
+// 第 i 張卡的時間偏移：動作差一格、切換時機差一個 tick，前 9 張的相位都不同。
+export function phaseOffset(index) {
+  return index * (ACTION_MS + TICK_MS);
+}
+
+export function statusText(status, ms = 0) {
   const state = stateFor(status);
-  if (state === "working") return "mods/malfoid-agents/states/working-actions-v2.gif";
-  return `mods/malfoid-agents/states/${state}.png`;
+  return state === "working" ? actionAt(ms).text : STATUS[state];
+}
+
+export function spritePath(status, ms = 0) {
+  const state = stateFor(status);
+  const sprite = state === "working" ? actionAt(ms).sprite : state;
+  return `mods/malfoid-agents/states/${sprite}.png`;
 }
 
 // Malfoid 版面固定此寬度，需與 layouts/malfoid.json、malfoid-chrome 一致；

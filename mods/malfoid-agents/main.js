@@ -2,9 +2,8 @@
 import { View, div, image, svg } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { agents, run, setAgentOrder, layout, theme, window, setShared } from "herdr";
-import { SIDEBAR_WIDTH, frameColor, iconKind, nextSidebarWidth, spritePath, stateFor } from "./lib.js";
+import { SIDEBAR_WIDTH, TICK_MS, frameColor, iconKind, nextSidebarWidth, phaseOffset, spritePath, stateFor, statusText } from "./lib.js";
 
-const STATUS = { working: "施法中", blocked: "等待指示", done: "已完成", idle: "休息中" };
 const sidebarWidth = () => layout()?.children?.find(n => n.id === "sidebar")?.size?.px ?? SIDEBAR_WIDTH;
 
 // macOS 收合後 traffic lights 佔滿 chrome 列，展開鈕只能放在這裡。
@@ -21,7 +20,14 @@ function programIcon(p, t) {
 }
 
 export default class Malfoid extends View {
-  card(a, t, collapsed) {
+  init(_props, cx) {
+    // 只在有 agent 工作時重繪；各卡錯開切換，間隔等於最短切換間距，不是動畫計時器。
+    cx.timer.every(TICK_MS, (cx) => {
+      if (agents().some((a) => a.status === "working")) cx.notify();
+    });
+  }
+
+  card(a, t, collapsed, now) {
     const state = stateFor(a.status);
     const frame = frameColor(state, a.focused, t, collapsed);
     if (collapsed) {
@@ -44,7 +50,7 @@ export default class Malfoid extends View {
       .cursor_pointer()
       .hover((s) => s.bg(t.hover))
       .on_click(() => run("agent.focus", { terminal: a.address }))
-      .child(image(spritePath(state)).w(72).h(96).flex_none())
+      .child(image(spritePath(state, now)).w(72).h(96).flex_none())
       .child(
         v_flex()
           .flex_1()
@@ -61,7 +67,7 @@ export default class Malfoid extends View {
           .child(h_flex().gap(6).items_center()
             .child(div().size(6).rounded_full().bg(statusColor)
               .when(state === "working", el => el.loop("opacity", { from: 0.35, to: 1, period: 1600 })))
-            .child(div().text_size(11).text_color(statusColor).child(STATUS[state])))
+            .child(div().text_size(11).text_color(statusColor).child(statusText(state, now))))
           .child(h_flex().w_full().min_w(0).gap(4).items_center()
             .when(Boolean(iconKind(a.program)), el => el.child(programIcon(a.program, t)))
             .child(div().flex_1().min_w(0).text_size(10).text_color(t.dim).truncate().child(a.program?.name || "Agent"))),
@@ -71,6 +77,7 @@ export default class Malfoid extends View {
   render() {
     const t = theme();
     const list = agents();
+    const now = Date.now();
     const collapsed = sidebarWidth() < 160;
     setAgentOrder(list.map((a) => a.address));
     return v_flex()
@@ -88,7 +95,7 @@ export default class Malfoid extends View {
           .gap(6)
           .p(6)
           .overflow_y_scrollbar()
-          .children(list.map((a) => this.card(a, t, collapsed)))
+          .children(list.map((a, i) => this.card(a, t, collapsed, now + phaseOffset(i))))
           .when(list.length === 0, (el) =>
             el.child(v_flex().items_center().gap(12).p(12)
               .child(image(spritePath("idle")).w(collapsed ? 42 : 120).h(collapsed ? 56 : 160))
