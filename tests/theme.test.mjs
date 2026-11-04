@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
-import { STATES, stateFor, spritePath, nextSidebarWidth, frameColor, SIDEBAR_WIDTH } from "../mods/malfoid-agents/lib.js";
+import { STATES, stateFor, spritePath, nextSidebarWidth, frameColor, iconKind, SIDEBAR_WIDTH } from "../mods/malfoid-agents/lib.js";
 import { PORTRAITS, assignPortraits } from "../mods/malfoid-tabs/portraits.js";
 import { housePath } from "../mods/malfoid-spaces/houses.js";
 import { openCommand, parseListing } from "../mods/malfoid-inbox/lib.js";
@@ -107,6 +107,13 @@ test("a blocked agent keeps its gold frame while focused, in both card sizes", (
   }
   assert.equal(frameColor("working", false, t, false), "line");
   assert.equal(frameColor("working", false, t, true), "mint");
+});
+
+test("agent cards draw the program icon the way its table entry says", () => {
+  assert.equal(iconKind({ icon: "icons/claude.svg", tint: true }), "svg");
+  assert.equal(iconKind({ icon: "icons/logo.svg", tint: false }), "image");
+  assert.equal(iconKind({ icon: null, tint: true }), null);
+  assert.equal(iconKind(undefined), null);
 });
 
 test("Inbox watches ~/Downloads", () => {

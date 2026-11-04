@@ -1,8 +1,8 @@
 // 修改自 Traveler：魔法學院四態角色卡，跟隨 Herdr 即時狀態。
-import { View, div, image } from "gpui-kit";
+import { View, div, image, svg } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { agents, run, setAgentOrder, layout, theme, window, setShared } from "herdr";
-import { SIDEBAR_WIDTH, frameColor, nextSidebarWidth, spritePath, stateFor } from "./lib.js";
+import { SIDEBAR_WIDTH, frameColor, iconKind, nextSidebarWidth, spritePath, stateFor } from "./lib.js";
 
 const STATUS = { working: "施法中", blocked: "等待指示", done: "已完成", idle: "休息中" };
 const sidebarWidth = () => layout()?.children?.find(n => n.id === "sidebar")?.size?.px ?? SIDEBAR_WIDTH;
@@ -12,6 +12,12 @@ function toggleSidebar() {
   const px = sidebarWidth();
   setShared("sidebar.collapsed", px >= 160); // 舊版模組仍讀這個旗標
   run("layout.resize", { id: "sidebar", px: nextSidebarWidth(px, window()?.platform) });
+}
+
+function programIcon(p, t) {
+  return iconKind(p) === "svg"
+    ? svg(p.icon).size(14).flex_none().text_color(t.foreground)
+    : image(p.icon).w(14).h(14).flex_none();
 }
 
 export default class Malfoid extends View {
@@ -56,7 +62,9 @@ export default class Malfoid extends View {
             .child(div().size(6).rounded_full().bg(statusColor)
               .when(state === "working", el => el.loop("opacity", { from: 0.35, to: 1, period: 1600 })))
             .child(div().text_size(11).text_color(statusColor).child(STATUS[state])))
-          .child(div().text_size(10).text_color(t.dim).truncate().child(a.program?.name || "Agent")),
+          .child(h_flex().w_full().min_w(0).gap(4).items_center()
+            .when(Boolean(iconKind(a.program)), el => el.child(programIcon(a.program, t)))
+            .child(div().flex_1().min_w(0).text_size(10).text_color(t.dim).truncate().child(a.program?.name || "Agent"))),
       );
   }
 

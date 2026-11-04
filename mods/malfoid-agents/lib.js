@@ -20,6 +20,12 @@ export function nextSidebarWidth(px, platform) {
   return platform === "macos" ? 76 : 44;
 }
 
+// 程式圖示：單色字形用 svg 上色，彩色圖用 image，沒有圖示就不畫。
+export function iconKind(program) {
+  if (!program?.icon) return null;
+  return program.tint ? "svg" : "image";
+}
+
 // blocked 最優先：focused 的 accent 不可蓋掉金框，收合與展開一致。
 export function frameColor(state, focused, t, collapsed) {
   if (state === "blocked") return t.blocked;
