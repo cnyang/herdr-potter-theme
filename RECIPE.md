@@ -19,6 +19,7 @@ Spaces 與 Agents 以 2px accent 分隔線分開；右側 panel 使用 sidebar.p
 `done` 舉杖微笑，薄荷綠狀態；`idle` 抱書休息。未知狀態回到休息姿態。
 卡片點擊執行 `agent.focus`，Spaces 點擊切換、右鍵開選單、同機器內可排序。
 分頁與面板保留 Traveler 的操作，面板開關按 space 記憶。
+右側 Lyrics 按鈕開啟歌詞面板：讀音樂 daemon 的 `state.json`，向 `~/.config/music/lyrics.json` 指定的 lrclib 查詢，同步歌詞高亮並置中。
 Tab 從 10 張照片頭像隨機配圖，以 Tab ID 存在 localStorage；改名、排序或重畫不換圖，10 張用完才重複。
 
 ## Built from
@@ -42,6 +43,6 @@ Spaces 保留上游 Git 查詢與 `hc machine ls`。工作動作用 1 秒計時�
 ## Done when
 
 1. `node --test` 與 `node scripts/lint.mjs` 通過。
-2. 八個 `herdr-app check` 通過，四態卡片的原生 gallery 檢查通過。
+2. 十個 `herdr-app check` 通過，四態卡片的原生 gallery 檢查通過。
 3. 切換後 `herdr-app status` 沒有新模組錯誤，截圖可見角色、學院徽章與墨綠面板。
 4. 角色卡沒有用量條或數值，Space 列縮小後 Git 資訊仍可見，新底圖上的終端內容仍清楚可讀。

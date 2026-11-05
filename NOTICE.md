@@ -27,6 +27,18 @@ bundled Lucide icon notice. These copies change asset paths and the panel root
 background only. Git Graph dialogs and shared settings continue to use the
 existing git-graph module. The original installed modules remain separate.
 
+`mods/malfoid-music` is modified from the yt-music mod of
+https://github.com/cybertron288/herdr-mods/tree/main/yt-music (MIT, Copyright (c) 2026
+cybertron288; the licence text is kept in `mods/malfoid-music/LICENSE-yt-music.txt`).
+Local change: the daemon controls the local Apple Music app through its AppleScript
+dictionary instead of a YouTube Music tab in Chrome; theme colors and sidebar placement.
+Its icons are Lucide (ISC), copied unchanged from yt-music.
+
+`mods/malfoid-lyrics` ports the LRC parsing, current-line and two-step lrclib lookup
+(`/api/get`, then `/api/search`) from the author's own MusicTUI project
+(`tools/music/Sources/TUI/Lyrics.swift`, `Backends/LRCLibClient.swift`). The Lyrics
+button icon is Lucide `music` (ISC).
+
 `mods/file-icons` is a modified copy of the file-icons mod from
 https://github.com/cybertron288/herdr-mods/tree/main/file-icons, which is itself
 modified from Herdr's built-in `files` module (Apache-2.0,

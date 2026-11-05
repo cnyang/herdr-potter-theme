@@ -40,6 +40,8 @@ herdr-app check mods/malfoid-files
 herdr-app check mods/malfoid-changes
 herdr-app check mods/malfoid-inbox
 herdr-app check mods/malfoid-git-graph
+herdr-app check mods/malfoid-music
+herdr-app check mods/malfoid-lyrics
 ```
 
 `lint` 執行 JavaScript 語法與 JSON 解析檢查。原生模組檢查還需搭配實機畫面，
@@ -55,9 +57,9 @@ Files 面板使用隨附的 `mods/file-icons`（來自 herdr-mods，Material Ico
 node scripts/install.mjs
 ```
 
-安裝程式會預先確認依賴與撞名，只新增八個 `malfoid-*` 模組、layout、預覽與 theme。
+安裝程式會預先確認依賴與撞名，只新增十個 `malfoid-*` 模組、layout、預覽與 theme。
 已存在任何同名目的路徑就停止；已安裝者更新用 `node scripts/install.mjs --update`，只覆寫 `malfoid-*` 路徑，修改會熱重載。
-安裝不切換畫面；先對安裝後的八個模組執行原生檢查，再切換：
+安裝不切換畫面；先對安裝後的十個模組執行原生檢查，再切換：
 
 ```sh
 herdr-app check ~/.config/herdr-app/mods/malfoid-agents
@@ -68,6 +70,8 @@ herdr-app check ~/.config/herdr-app/mods/malfoid-files
 herdr-app check ~/.config/herdr-app/mods/malfoid-changes
 herdr-app check ~/.config/herdr-app/mods/malfoid-inbox
 herdr-app check ~/.config/herdr-app/mods/malfoid-git-graph
+herdr-app check ~/.config/herdr-app/mods/malfoid-music
+herdr-app check ~/.config/herdr-app/mods/malfoid-lyrics
 herdr-app do layout.switch '{"name":"malfoid"}'
 ```
 
@@ -81,6 +85,14 @@ herdr-app do layout.switch '{"name":"malfoid"}'
 - Space 徽章按顯示順序循環：史萊哲林 → 葛來分多 → 雷文克勞 → 赫夫帕夫。主機標題與工作樹子列不計入徽章順序。
 - Watch 面板監看 `~/Downloads/` 第一層所有已下載完的檔案（內部 id 仍是 `inbox`）。PNG、JPG、JPEG、WebP、GIF、MP4、MOV、PDF 點一下用預設 App 開，其他檔案只在 Finder 顯示。有新檔時跳 toast，面板關著也會提醒。
   將檔案放入該資料夾後會更新；空資料夾顯示 `0 files`。專案與 Downloads 裡的檔案需先放入此資料夾。
+- 側欄底部的 Apple Music 區塊（`malfoid-music`，僅 macOS）：沒歌時高度 0，有歌時長出曲名、時間、進度條與上一首／倒退 10 秒／播放暫停／快轉 10 秒／下一首。
+  一個長駐 `osascript` daemon（herdr-core 終端 `apm-<雜湊>`）每秒讀 Music 並寫 `data/malfoid-music/state.json`，按鈕寫 `cmd.json`。
+  第一次會跳出「允許控制 Music」的系統授權；若拒絕，區塊改顯示提示列，到系統設定 > 隱私權與安全性 > 自動化開啟。側欄收成窄條時區塊自動縮為 0。
+- 右側分頁列的 Lyrics 按鈕（音符圖示）打開歌詞面板（`malfoid-lyrics`）：顯示目前這首歌的歌詞，向自架的 lrclib 查詢。
+  先 `/api/get` 精確比對、404 再 `/api/search`（做法取自 MusicTUI）；有時間軸的歌詞高亮目前這句並置中，純文字歌詞可自己捲動。
+  端點讀 `~/.config/music/lyrics.json` 的 `{"endpoint": "http://host:3300"}`（與 MusicTUI 共用）；沒設定就顯示提示，不會退回公開的 lrclib.net。
+  曲目與位置取自音樂 daemon 的 `state.json`；面板關著時完全不讀檔、不連網。每首歌每次執行只查一次，連不上的 15 秒後重試。
+  用 `curl` 連線（Herdr 的 `fetch` 沒有逾時設定），句子過長會截斷，不換行。
 - 角色卡只顯示名稱、狀態與程式名稱；用量條、數值及相關快取讀取已移除。
 - 沒有獨立的 Thinking 狀態，亦沒有角色肢體逐格動畫。
 - 圖片透過內建 imagegen 生成，再做固定分格與尺寸轉換；提示詞見 `artwork/prompts.md` 與 `artwork/extra-poses-prompt.md`，來源 SHA-256 見 `artwork/sources.json`。

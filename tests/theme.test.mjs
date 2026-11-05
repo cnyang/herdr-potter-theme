@@ -10,6 +10,7 @@ import { PORTRAITS, assignPortraits } from "../mods/malfoid-tabs/portraits.js";
 import { housePath } from "../mods/malfoid-spaces/houses.js";
 import { openCommand, parseListing } from "../mods/malfoid-inbox/lib.js";
 import { listNames, newFilesNote } from "../mods/malfoid-tabs/downloads.js";
+import { clock, hash, position, blockHeight } from "../mods/malfoid-music/lib.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const json = path => JSON.parse(readFileSync(join(root, path), "utf8"));
@@ -176,7 +177,7 @@ test("each panel shows its room icon in full color when empty, never over an err
 
 test("panel buttons use bold 24px icons drawn for small sizes", () => {
   const tabs = readFileSync(join(root, "mods/malfoid-tabs/main.js"), "utf8");
-  for (const [id, label] of Object.entries({ files: "Files", changes: "Changes", graph: "Git", inbox: "Watch" })) {
+  for (const [id, label] of Object.entries({ files: "Files", changes: "Changes", graph: "Git", inbox: "Watch", lyrics: "Lyrics" })) {
     const path = `mods/malfoid-tabs/art/panel-${id}.svg`;
     assert.ok(tabs.includes(`panelButton("${id}", "${label}", "${path}")`), id);
     const icon = readFileSync(join(root, path), "utf8");
@@ -245,7 +246,7 @@ test("installer refuses missing dependencies and name collisions before copying"
     assert.equal(result.status, 0, result.stderr);
     assert.ok(existsSync(join(target, "themes/malfoid.json")));
     assert.ok(existsSync(join(target, "mods/file-icons/icons/folder.svg")));
-    for (const name of ["agents", "tabs", "spaces", "chrome", "files", "changes", "inbox", "git-graph"]) {
+    for (const name of ["agents", "tabs", "spaces", "chrome", "files", "changes", "inbox", "git-graph", "music", "lyrics"]) {
       assert.ok(existsSync(join(target, `mods/malfoid-${name}/main.js`)), name);
     }
     const file = join(target, "mods/malfoid-agents/main.js");
@@ -284,4 +285,48 @@ test("bundled file-icons ships its icons, the MIT license and the alpha prop", (
   for (const name of ["main.js", "icons.js", "mod.json", "LICENSE-material-icon-theme.txt", "chevron-down.svg", "chevron-right.svg", "icons/file.svg", "icons/folder.svg"]) assert.ok(existsSync(join(dir, name)), name);
   assert.ok(readdirSync(join(dir, "icons")).length >= 1184);
   assert.match(readFileSync(join(dir, "main.js"), "utf8"), /props\(\)\?\.alpha/);
+});
+
+test("music clock reads m:ss and the position never runs past the track", () => {
+  assert.deepEqual([0, 7.9, 187, 3900, -5, undefined].map(clock), ["0:00", "0:07", "3:07", "65:00", "0:00", "0:00"]);
+  const s = { seconds: 100, duration: 120, at: 0, paused: false };
+  assert.equal(position(s, 5000), 105);
+  assert.equal(position(s, 60000), 120, "capped at the track length");
+  assert.equal(position({ ...s, paused: true }, 60000), 100, "paused clock stands still");
+  assert.equal(position({ ...s, duration: 0 }, 60000), 160, "a stream (duration 0) has no cap");
+});
+
+test("music block takes no room without a track, on the narrow rail, and is shorter for the permission hint", () => {
+  assert.equal(blockHeight(null, false), 0);
+  assert.equal(blockHeight({ title: "a" }, true), 0);
+  assert.equal(blockHeight({ error: "denied" }, true), 0);
+  assert.equal(blockHeight({ error: "denied" }, false), 36);
+  assert.equal(blockHeight({ title: "a" }, false), 92);
+});
+
+test("music daemon name hash is FNV-1a so an edited daemon.js gets a new terminal name", () => {
+  assert.equal(hash(""), "811c9dc5");
+  assert.equal(hash("a"), "e40c292c");
+  assert.notEqual(hash("daemon v1"), hash("daemon v2"));
+});
+
+test("music mod sits in the sidebar as a collapsed block, ships its icons and keeps the crash guards", () => {
+  const sidebar = json("layouts/malfoid.json").children.find(n => n.id === "sidebar");
+  const ids = sidebar.children.map(n => n.id);
+  assert.deepEqual(ids.slice(ids.indexOf("music") - 1, ids.indexOf("music") + 2), ["sidebar-lists", "music", "sidebar-footer"]);
+  const block = sidebar.children.find(n => n.id === "music");
+  assert.equal(block.content.mod, "malfoid-music");
+  assert.deepEqual([block.size.px, block.min], [0, 0]);
+  const main = readFileSync(join(root, "mods/malfoid-music/main.js"), "utf8");
+  assert.ok(main.includes('const BLOCK = "music"'), "mod must resize the layout block with this id");
+  for (const icon of ["music", "skip-back", "rewind", "play", "pause", "fast-forward", "skip-forward"]) {
+    assert.ok(existsSync(join(root, `mods/malfoid-music/${icon}.svg`)), icon);
+    assert.ok(main.includes(`"${icon}"`), `${icon} unused`);
+  }
+  assert.ok(existsSync(join(root, "mods/malfoid-music/LICENSE-yt-music.txt")));
+  const daemon = readFileSync(join(root, "mods/malfoid-music/daemon.js"), "utf8");
+  // Ref() 錯誤指標一走到錯誤路徑 osascript 就 segfault（exit 139）；錯誤碼改在 AppleScript 內接住。
+  assert.ok(!/\bRef\(\)/.test(daemon.replace(/\/\/.*$/gm, "")), "executeAndReturnError(Ref()) crashes osascript on errors");
+  // 腳本 source 夾變動值會讓編譯快取失效、物件堆積後 osascript 當掉。
+  assert.ok(!/Date\.now|Math\.random/.test(daemon.slice(0, daemon.indexOf("function run(argv)"))), "script sources must be constant");
 });

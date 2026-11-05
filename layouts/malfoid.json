@@ -54,6 +54,17 @@
           }
         },
         {
+          "id": "music",
+          "type": "block",
+          "content": {
+            "mod": "malfoid-music"
+          },
+          "size": {
+            "px": 0
+          },
+          "min": 0
+        },
+        {
           "id": "sidebar-footer",
           "type": "block",
           "content": {
@@ -163,6 +174,13 @@
                       "type": "block",
                       "content": {
                         "mod": "malfoid-git-graph"
+                      }
+                    },
+                    {
+                      "id": "lyrics",
+                      "type": "block",
+                      "content": {
+                        "mod": "malfoid-lyrics"
                       }
                     }
                   ],
