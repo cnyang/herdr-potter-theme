@@ -2,7 +2,10 @@
 
 工具：內建 `image_gen.imagegen`。2026-11-04 製作。
 
-## 四態角色圖
+## 四態角色圖（已被 Agent UI Kit 人像取代）
+
+目前 `mods/malfoid-agents/states/` 的 idle／working／thinking／blocked／done 取自 `malfoid/five-magical-portrait-states.png`（2172×724 去背，不進 git）。
+依 alpha 質量最小處切成五段（x 切點 457／881／1301／1724），各自置中放進 543×724 透明畫布；idle 右緣一小段鄰格飄髮已清除。以下為先前透明四態圖的紀錄。
 
 參考圖：`malfoid/奇幻女巫角色狀態素材表.png`。
 輸出：`artwork/character-states-source.png`，2172×724，透明 PNG。

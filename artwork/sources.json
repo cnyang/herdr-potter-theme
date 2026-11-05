@@ -112,14 +112,6 @@
     "sha256": "c495f0a53425f528cab0ee6eba33da1374fedc45629a0999a0e75e4e465495d7"
   },
   {
-    "path": "mods/malfoid-agents/states/working-potion.png",
-    "sha256": "5ebb5b419bae5b0324df1f29d55ce9f0a318b3dbc11482c9ac09dda14da58f87"
-  },
-  {
-    "path": "mods/malfoid-agents/states/working-reading.png",
-    "sha256": "24c6445a94ad2d754d68ea407e444b8bb6fc49ff878a2533e8332602509bae81"
-  },
-  {
     "path": "malfoid/four-house-crests.png",
     "sha256": "4d2e54fb977399c116fe5498ffb3042517d3af22b02ab7fc3a671793fc6716d5"
   },
@@ -146,5 +138,29 @@
   {
     "path": "mods/malfoid-chrome/hogwarts-crest.png",
     "sha256": "b1df5748ef74a374c7f80d11d2619e8d6e3eb3a889055e4950449f5ac1886d78"
+  },
+  {
+    "path": "mods/malfoid-agents/states/idle.png",
+    "sha256": "7ea301db3e39795e816fbc59d4b7ac175fd9823229238f50447a87ed60c42105"
+  },
+  {
+    "path": "mods/malfoid-agents/states/working.png",
+    "sha256": "79975fe08dfb6bde84af818c5a435ee096315d6ad95f65716c2267e7612cd187"
+  },
+  {
+    "path": "mods/malfoid-agents/states/thinking.png",
+    "sha256": "741a1eafa076f42d2a5f4c527f6dcad6c4cdb75e3122baa2b369832723ece620"
+  },
+  {
+    "path": "mods/malfoid-agents/states/blocked.png",
+    "sha256": "5b6e502f8c7d013817f3a6dc07ecf6c7cd7d0a9f0dc672a91af292cfd9955258"
+  },
+  {
+    "path": "mods/malfoid-agents/states/done.png",
+    "sha256": "39528967db0c5c8684a5da359c8db4bfbe5bcb280b8f0d5ba6e50c332adc837b"
+  },
+  {
+    "path": "malfoid/five-magical-portrait-states.png",
+    "sha256": "fbec296f76df887eb19e284b868bb4a0fd9830721118c8b573a95edb4b8a7a58"
   }
 ]

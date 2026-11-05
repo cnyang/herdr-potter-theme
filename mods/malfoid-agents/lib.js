@@ -7,22 +7,21 @@ export function stateFor(status) {
 
 const STATUS = { blocked: "等待指示", done: "已完成", idle: "休息中" };
 
-// 工作中輪替三種動作。文字與圖由同一個時間算出，兩者才不會錯開。
+// 工作中輪替兩種動作。文字與圖由同一個時間算出，兩者才不會錯開。
 export const ACTION_MS = 3000;
 export const TICK_MS = 1000;
 const WORKING_ACTIONS = [
   { text: "施法中", sprite: "working" },
-  { text: "製魔藥", sprite: "working-potion" },
-  { text: "閱讀咒語", sprite: "working-reading" },
+  { text: "思考中", sprite: "thinking" },
 ];
 
 function actionAt(ms) {
   return WORKING_ACTIONS[Math.floor(ms / ACTION_MS) % WORKING_ACTIONS.length];
 }
 
-// 第 i 張卡的時間偏移：動作差一格、切換時機差一個 tick，前 9 張的相位都不同。
+// 第 i 張卡的時間偏移：差一格動作，相鄰卡永遠交錯顯示不同動作（整列同時換）。
 export function phaseOffset(index) {
-  return index * (ACTION_MS + TICK_MS);
+  return index * ACTION_MS;
 }
 
 export function statusText(status, ms = 0) {

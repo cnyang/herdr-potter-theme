@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
-import { STATES, stateFor, spritePath, nextSidebarWidth, frameColor, iconKind, statusText, phaseOffset, ACTION_MS, TICK_MS, SIDEBAR_WIDTH } from "../mods/malfoid-agents/lib.js";
+import { STATES, stateFor, spritePath, nextSidebarWidth, frameColor, iconKind, statusText, phaseOffset, ACTION_MS, SIDEBAR_WIDTH } from "../mods/malfoid-agents/lib.js";
 import { PORTRAITS, assignPortraits } from "../mods/malfoid-tabs/portraits.js";
 import { housePath } from "../mods/malfoid-spaces/houses.js";
 import { openCommand, parseListing } from "../mods/malfoid-inbox/lib.js";
@@ -104,15 +104,15 @@ test("a blocked agent keeps its gold frame while focused, in both card sizes", (
 });
 
 test("working rotates label and pose together; other states stay put", () => {
-  const seen = [0, 1, 2].map((i) => [statusText("working", i * ACTION_MS), spritePath("working", i * ACTION_MS)]);
-  assert.deepEqual(seen.map(([text]) => text), ["施法中", "製魔藥", "閱讀咒語"]);
-  assert.deepEqual(seen.map(([, path]) => path.split("/").pop()), ["working.png", "working-potion.png", "working-reading.png"]);
+  const seen = [0, 1].map((i) => [statusText("working", i * ACTION_MS), spritePath("working", i * ACTION_MS)]);
+  assert.deepEqual(seen.map(([text]) => text), ["施法中", "思考中"]);
+  assert.deepEqual(seen.map(([, path]) => path.split("/").pop()), ["working.png", "thinking.png"]);
   for (const [, path] of seen) {
     const bytes = readFileSync(join(root, path));
     assert.equal(bytes.subarray(1, 4).toString(), "PNG");
     assert.equal(bytes.readUInt32BE(16) * 4, bytes.readUInt32BE(20) * 3);
   }
-  assert.equal(statusText("working", 3 * ACTION_MS), "施法中");
+  assert.equal(statusText("working", 2 * ACTION_MS), "施法中");
   assert.equal(statusText("working", ACTION_MS - 1), "施法中");
   assert.equal(statusText("idle", ACTION_MS), "休息中");
   assert.equal(statusText("blocked", ACTION_MS), "等待指示");
@@ -120,22 +120,13 @@ test("working rotates label and pose together; other states stay put", () => {
   assert.equal(spritePath("idle", ACTION_MS), spritePath("idle"));
 });
 
-test("neighbouring agents never show the same action or switch together", () => {
-  const cycle = ACTION_MS * 3;
-  const phases = Array.from({ length: 9 }, (_, i) => phaseOffset(i) % cycle);
-  assert.equal(new Set(phases).size, 9);
-  // 三張全不同又要錯開切換在數學上不可能，只保證相鄰兩張永遠不同。
+test("neighbouring agents never show the same action", () => {
+  // 兩個動作無法同時做到「相鄰永遠不同」與「錯開切換」，取前者：相鄰卡交錯，整列同時換。
+  const cycle = ACTION_MS * 2;
   for (let ms = 0; ms < cycle; ms += 100) {
     for (const i of [0, 1, 2, 7]) {
       assert.notEqual(statusText("working", ms + phaseOffset(i)), statusText("working", ms + phaseOffset(i + 1)), `at ${ms}ms`);
     }
-  }
-  // 每次 tick 最多只有一張卡換動作，切換時機才真的錯開。
-  for (let tick = 0; tick < 9; tick++) {
-    const before = tick * TICK_MS, after = before + TICK_MS;
-    const changed = [0, 1, 2].filter((i) =>
-      statusText("working", before + phaseOffset(i)) !== statusText("working", after + phaseOffset(i)));
-    assert.equal(changed.length, 1);
   }
 });
 

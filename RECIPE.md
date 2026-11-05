@@ -15,7 +15,7 @@ Spaces 與 Agents 以 2px accent 分隔線分開；右側 panel 使用 sidebar.p
 
 ## How it behaves
 
-`working` 每 3 秒同步切換施法中、製魔藥、閱讀咒語的文字與姿態，青綠狀態燈呼吸；`blocked` 托球，金色文字與外框；
+`working` 每 3 秒同步切換施法中、思考中的文字與姿態，相鄰卡交錯，青綠狀態燈呼吸；`blocked` 托球，金色文字與外框；
 `done` 舉杖微笑，薄荷綠狀態；`idle` 抱書休息。未知狀態回到休息姿態。
 卡片點擊執行 `agent.focus`，Spaces 點擊切換、右鍵開選單、同機器內可排序。
 分頁與面板保留 Traveler 的操作，面板開關按 space 記憶。
@@ -29,12 +29,12 @@ Herdr 內建 pane／workspace-status，以及 malfoid-files／malfoid-changes／
 後四者為既有面板的主題專用複本，根底色使用 chrome 的 60% 不透明度，讓 panel 背景圖透出。
 原本四個模組改自本機 Traveler，使用 `agents`、`spaces`、`panes`、`readTextFile`、`watchFolder`、`run`；
 Spaces 保留上游 Git 查詢與 `hc machine ls`。工作動作用 1 秒計時器重繪（僅在有 agent 工作時），文字與 PNG 才能同步，各卡依列表順序錯開；狀態燈使用 `.loop("opacity", ...)`，不使用高頻計時器。
-美術為角色照片、使用者素材表、imagegen 生成的四態透明圖與空城堡、手寫 SVG 小圖示。
+美術為角色照片、使用者素材表、使用者提供的去背五態人像（543×724 透明）與空城堡、手寫 SVG 小圖示。
 
 ## Watch out
 
 此版本以本機 Herdr 0.1.12 為準，需要已安裝的 inbox 與 git-graph。
-各姿態為固定畫面，working 以三張姿態輪替，由時間決定，不代表 agent 實際在做什麼；沒有獨立 Thinking 狀態或八角色換裝。
+各姿態為固定畫面，working 以兩張姿態（Working／Thinking）輪替，由時間決定，不代表 agent 實際在做什麼；沒有獨立 Thinking 狀態或八角色換裝。
 模組不能匯入自己資料夾以外的 JavaScript；不要跨模組共用 lib。
 原生 check 不涵蓋完整畫面與稍後載入的資料，必須搭配 `herdr-app status` 和 `herdr-app shot`。
 所有安裝路徑獨立，撞名時停止，既有 layout 保留可切回。

@@ -1,4 +1,6 @@
-# 額外工作姿態
+# 額外工作姿態（已停用）
+
+`working-potion.png`、`working-reading.png` 已移除，工作輪替改為 working／thinking 兩張，見 `artwork/prompts.md`。
 
 使用內建 imagegen；參考 `artwork/character-states-source.png`。
 生成 `artwork/working-poses-source.png`，1881×836，三格各 627×836，依序為翻書、寫筆記、調製魔藥。
