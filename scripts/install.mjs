@@ -11,7 +11,7 @@ const files = [
   "layouts/malfoid.json", "layouts/malfoid.svg", "themes/malfoid.json",
 ];
 const update = process.argv.includes("--update");
-const dependencies = ["pane", "files", "changes", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "inbox", "git-graph"];
+const dependencies = ["pane", "files", "changes", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "inbox", "git-graph", "file-icons"];
 
 // 完整預檢後才複製；撞名預設停止，避免覆蓋個人主題或設定。
 // --update 只覆寫上面列出的 malfoid 路徑，供已安裝者更新；來源已刪的檔案不會移除。

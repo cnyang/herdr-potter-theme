@@ -25,8 +25,8 @@ Tab 從 10 張照片頭像隨機配圖，以 Tab ID 存在 localStorage；改名
 
 `layouts/malfoid.json` 的 root row 包含 sidebar column 與 work column，
 sidebar 使用 `malfoid-chrome`、`malfoid-spaces`、`malfoid-agents`；work 使用 `malfoid-tabs`、
-Herdr 內建 pane／workspace-status，以及 malfoid-files／malfoid-changes／malfoid-inbox／malfoid-git-graph。
-後四者為既有面板的主題專用複本，根底色使用 chrome 的 60% 不透明度，讓 panel 背景圖透出。
+Herdr 內建 pane／workspace-status，外部的 file-icons（Files 面板），以及 malfoid-changes／malfoid-inbox／malfoid-git-graph。
+malfoid-* 面板為既有面板的主題專用複本，根底色使用 chrome 的 60% 不透明度，讓 panel 背景圖透出；file-icons 的本機版同樣用 `${t.chrome}99`。
 原本四個模組改自本機 Traveler，使用 `agents`、`spaces`、`panes`、`readTextFile`、`watchFolder`、`run`；
 Spaces 保留上游 Git 查詢與 `hc machine ls`。工作動作用 1 秒計時器重繪（僅在有 agent 工作時），文字與 PNG 才能同步，各卡依列表順序錯開；狀態燈使用 `.loop("opacity", ...)`，不使用高頻計時器。
 美術為角色照片、使用者素材表、使用者提供的去背五態人像（543×724 透明）與空城堡、手寫 SVG 小圖示。
