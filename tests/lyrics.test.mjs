@@ -98,7 +98,7 @@ test("Lyrics tab button opens a panel-body child that the layout and the mod agr
   assert.deepEqual(stack.children.find((c) => c.id === "lyrics")?.content, { mod: "malfoid-lyrics" });
   const main = read("mods/malfoid-lyrics/main.js");
   assert.ok(main.includes('const BLOCK = "lyrics"'), "mod looks for its own stack child by this id");
-  assert.ok(/const enabled = .*"lyrics"\];/.test(read("mods/malfoid-tabs/main.js")), "per-space panel restore must know the lyrics panel");
+  assert.ok(/const enabled = .*"lyrics"/.test(read("mods/malfoid-tabs/main.js")), "per-space panel restore must know the lyrics panel");
   // 面板關著時計時器不能讀檔或連網（mod 啟動後即使面板被切走也一直活著）
   assert.match(main, /async tick\(cx\) \{\s*if \(!isOpen\(\)\)/);
   // lrclib 端點只能來自設定檔，不能偷偷退回公開伺服器

@@ -42,6 +42,7 @@ herdr-app check mods/malfoid-inbox
 herdr-app check mods/malfoid-git-graph
 herdr-app check mods/malfoid-music
 herdr-app check mods/malfoid-lyrics
+herdr-app check mods/malfoid-notes
 ```
 
 `lint` 執行 JavaScript 語法與 JSON 解析檢查。原生模組檢查還需搭配實機畫面，
@@ -57,9 +58,9 @@ Files 面板使用隨附的 `mods/file-icons`（來自 herdr-mods，Material Ico
 node scripts/install.mjs
 ```
 
-安裝程式會預先確認依賴與撞名，只新增十個 `malfoid-*` 模組、layout、預覽與 theme。
+安裝程式會預先確認依賴與撞名，只新增十一個 `malfoid-*` 模組、layout、預覽與 theme。
 已存在任何同名目的路徑就停止；已安裝者更新用 `node scripts/install.mjs --update`，只覆寫 `malfoid-*` 路徑，修改會熱重載。
-安裝不切換畫面；先對安裝後的十個模組執行原生檢查，再切換：
+安裝不切換畫面；先對安裝後的十一個模組執行原生檢查，再切換：
 
 ```sh
 herdr-app check ~/.config/herdr-app/mods/malfoid-agents
@@ -72,6 +73,7 @@ herdr-app check ~/.config/herdr-app/mods/malfoid-inbox
 herdr-app check ~/.config/herdr-app/mods/malfoid-git-graph
 herdr-app check ~/.config/herdr-app/mods/malfoid-music
 herdr-app check ~/.config/herdr-app/mods/malfoid-lyrics
+herdr-app check ~/.config/herdr-app/mods/malfoid-notes
 herdr-app do layout.switch '{"name":"malfoid"}'
 ```
 
@@ -93,6 +95,10 @@ herdr-app do layout.switch '{"name":"malfoid"}'
   端點讀 `~/.config/music/lyrics.json` 的 `{"endpoint": "http://host:3300"}`（與 MusicTUI 共用）；沒設定就顯示提示，不會退回公開的 lrclib.net。
   曲目與位置取自音樂 daemon 的 `state.json`；面板關著時完全不讀檔、不連網。每首歌每次執行只查一次，連不上的 15 秒後重試。
   用 `curl` 連線（Herdr 的 `fetch` 沒有逾時設定），句子過長會截斷，不換行。
+- 右側分頁列的 Note 按鈕（紙張圖示）打開筆記面板（`malfoid-notes`）：一份 markdown 筆記，存在本機 `~/.config/herdr-app/data/theme-notes/note.md`，重開 app 或重開機都還在。
+  標題列的 Edit／Preview 切換：Edit 是多行輸入框，Preview 用內建 markdown 渲染；有內容時開啟先看 Preview，空的直接進 Edit。
+  輸入後每秒檢查一次，內容與磁碟不同才原子寫入；輸入框失焦、切到 Preview 也立刻寫。讀檔失敗（例如超過 1 MiB）時不會存檔，避免空白內容蓋掉原筆記。
+  Malfoid 與 Husky 共用同一個檔案，切換 theme 筆記不會消失。檔案被別的程式改過時，下一輪以面板內容覆蓋（後寫者勝）。
 - 角色卡只顯示名稱、狀態與程式名稱；用量條、數值及相關快取讀取已移除。
 - 沒有獨立的 Thinking 狀態，亦沒有角色肢體逐格動畫。
 - 圖片透過內建 imagegen 生成，再做固定分格與尺寸轉換；提示詞見 `artwork/prompts.md` 與 `artwork/extra-poses-prompt.md`，來源 SHA-256 見 `artwork/sources.json`。

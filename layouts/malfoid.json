@@ -182,6 +182,13 @@
                       "content": {
                         "mod": "malfoid-lyrics"
                       }
+                    },
+                    {
+                      "id": "notes",
+                      "type": "block",
+                      "content": {
+                        "mod": "malfoid-notes"
+                      }
                     }
                   ],
                   "active": "files"
