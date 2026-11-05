@@ -239,13 +239,12 @@ test("installer refuses missing dependencies and name collisions before copying"
       writeFileSync(join(target, "mods", name, "main.js"), "fixture");
     };
     for (const name of ["pane", "files", "changes", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "inbox", "git-graph"]) fixture(name);
-    // 缺 file-icons 時必須擋下，否則 layout 的 Files 面板會整個空白
-    assert.notEqual(install().status, 0);
-    assert.ok(!existsSync(join(target, "mods/malfoid-agents")));
-    fixture("file-icons");
+    // file-icons 隨主題附帶，不是前置依賴：全新機器沒有它也要能一併裝好
+    assert.ok(!existsSync(join(target, "mods/file-icons")));
     const result = install();
     assert.equal(result.status, 0, result.stderr);
     assert.ok(existsSync(join(target, "themes/malfoid.json")));
+    assert.ok(existsSync(join(target, "mods/file-icons/icons/folder.svg")));
     for (const name of ["agents", "tabs", "spaces", "chrome", "files", "changes", "inbox", "git-graph"]) {
       assert.ok(existsSync(join(target, `mods/malfoid-${name}/main.js`)), name);
     }
@@ -260,4 +259,29 @@ test("installer refuses missing dependencies and name collisions before copying"
     assert.equal(readFileSync(other, "utf8"), "fixture");
     assert.ok(!existsSync(join(target, "mods/malfoid-agents/gpui-kit.d.ts")));
   } finally { rmSync(target, { recursive: true, force: true }); }
+});
+
+test("installer keeps an existing file-icons unless --update", () => {
+  const target = mkdtempSync(join(tmpdir(), "herdr-malfoid-icons-"));
+  const run = (...args) => spawnSync(process.execPath, [join(root, "scripts/install.mjs"), ...args], { env: { ...process.env, HERDR_APP_HOME: target }, encoding: "utf8" });
+  try {
+    for (const name of ["pane", "files", "changes", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "inbox", "git-graph", "file-icons"]) {
+      mkdirSync(join(target, "mods", name), { recursive: true });
+      writeFileSync(join(target, "mods", name, "main.js"), "fixture");
+    }
+    const mine = join(target, "mods/file-icons/main.js");
+    writeFileSync(mine, "my edit");
+    // 另一個主題先裝過 file-icons：不算撞名，也不能被覆蓋
+    assert.equal(run().status, 0);
+    assert.equal(readFileSync(mine, "utf8"), "my edit");
+    assert.equal(run("--update").status, 0);
+    assert.equal(readFileSync(mine, "utf8"), readFileSync(join(root, "mods/file-icons/main.js"), "utf8"));
+  } finally { rmSync(target, { recursive: true, force: true }); }
+});
+
+test("bundled file-icons ships its icons, the MIT license and the alpha prop", () => {
+  const dir = join(root, "mods/file-icons");
+  for (const name of ["main.js", "icons.js", "mod.json", "LICENSE-material-icon-theme.txt", "chevron-down.svg", "chevron-right.svg", "icons/file.svg", "icons/folder.svg"]) assert.ok(existsSync(join(dir, name)), name);
+  assert.ok(readdirSync(join(dir, "icons")).length >= 1184);
+  assert.match(readFileSync(join(dir, "main.js"), "utf8"), /props\(\)\?\.alpha/);
 });

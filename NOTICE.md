@@ -26,3 +26,12 @@ https://github.com/rabeeh-ta/herdr-git-graph; it retains its upstream terms and
 bundled Lucide icon notice. These copies change asset paths and the panel root
 background only. Git Graph dialogs and shared settings continue to use the
 existing git-graph module. The original installed modules remain separate.
+
+`mods/file-icons` is a modified copy of the file-icons mod from
+https://github.com/cybertron288/herdr-mods/tree/main/file-icons, which is itself
+modified from Herdr's built-in `files` module (Apache-2.0,
+https://github.com/herdrdev/herdr-app). Its `icons/` are taken from Material Icon
+Theme 5.40.0 (MIT, Copyright (c) 2025 Material Extensions); the license text is kept
+in `mods/file-icons/LICENSE-material-icon-theme.txt` and must ship with the icons.
+Local change: the panel background is `chrome` plus an alpha (default `99`,
+overridable with the layout's `props.alpha`) so the panel's background art shows through.

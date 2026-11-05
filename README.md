@@ -47,8 +47,9 @@ herdr-app check mods/malfoid-git-graph
 
 ## 安裝與切換
 
-這版配合目前本機 Herdr 0.1.12，依賴已安裝的 `inbox`、`git-graph`、`file-icons`（Files 面板，來自 herdr-mods），
+這版配合目前本機 Herdr 0.1.12，依賴已安裝的 `inbox`、`git-graph`，
 以及 Herdr 內建的 pane、files、changes、workspace-status、menu、new-menu、picker、machine-add、workspace-chrome。
+Files 面板使用隨附的 `mods/file-icons`（來自 herdr-mods，Material Icon Theme 圖示）：機器上已有就保留，`--update` 才覆蓋。
 
 ```sh
 node scripts/install.mjs
