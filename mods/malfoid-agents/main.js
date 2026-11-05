@@ -99,7 +99,7 @@ export default class Malfoid extends View {
           .when(list.length === 0, (el) =>
             el.child(v_flex().items_center().gap(12).p(12)
               .child(image(spritePath("idle")).w(collapsed ? 42 : 120).h(collapsed ? 56 : 160))
-              .when(!collapsed, row => row.child(div().text_size(12).text_color(t.dim).child("等待魔法使加入")))),
+              .when(!collapsed, row => row.child(div().text_size(12).text_color(t.dim).child("等待 Agent 加入")))),
           ),
       )
       .when(collapsed, el => el.child(h_flex().h(28).flex_none().items_center().justify_center()
