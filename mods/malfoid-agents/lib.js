@@ -44,6 +44,14 @@ export function nextSidebarWidth(px, platform) {
   return platform === "macos" ? 76 : 44;
 }
 
+// Herdr 內建的 codex 圖示帶白色圓角底板，貼在卡片上會變成一塊白；
+// 改用同形、去掉底板的字形。其他程式沿用 Herdr 提供的圖示。
+const ICON_OVERRIDES = { codex: "mods/malfoid-agents/art/codex.svg" };
+
+export function iconSrc(program) {
+  return Object.hasOwn(ICON_OVERRIDES, program?.key) ? ICON_OVERRIDES[program.key] : program?.icon ?? null;
+}
+
 // 程式圖示：單色字形用 svg 上色，彩色圖用 image，沒有圖示就不畫。
 export function iconKind(program) {
   if (!program?.icon) return null;

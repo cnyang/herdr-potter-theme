@@ -2,7 +2,7 @@
 import { View, div, image, svg } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { agents, run, setAgentOrder, layout, theme, window, setShared } from "herdr";
-import { SIDEBAR_WIDTH, TICK_MS, frameColor, iconKind, nextSidebarWidth, phaseOffset, spritePath, stateFor, statusText } from "./lib.js";
+import { SIDEBAR_WIDTH, TICK_MS, frameColor, iconKind, iconSrc, nextSidebarWidth, phaseOffset, spritePath, stateFor, statusText } from "./lib.js";
 
 const sidebarWidth = () => layout()?.children?.find(n => n.id === "sidebar")?.size?.px ?? SIDEBAR_WIDTH;
 
@@ -16,7 +16,7 @@ function toggleSidebar() {
 function programIcon(p, t) {
   return iconKind(p) === "svg"
     ? svg(p.icon).size(14).flex_none().text_color(t.foreground)
-    : image(p.icon).w(14).h(14).flex_none();
+    : image(iconSrc(p)).w(14).h(14).flex_none();
 }
 
 export default class Malfoid extends View {
