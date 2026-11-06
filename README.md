@@ -12,7 +12,7 @@ Herdr 原生桌面主題，以 `malfoid/` 角色照片和「奇幻女巫角色�
 - 閒置抱書、等待指示托球、完成微笑舉杖；工作中每 3 秒切換「施法中」「思考中」，文字與姿態同步，相鄰 agent 交錯顯示不同動作。
 - 工作姿態與其他狀態都使用 PNG，6 秒一輪；工作狀態燈以原生 opacity 動畫呼吸。
 - 所有分頁均隨機分配角色頭像，包含一般終端與非 AI 程式；配圖按 Tab ID 保存，10 張用完才重複。Files／Changes／Git 面板沿用本機既有操作。
-- Files／Changes／Watch／Git 面板空狀態使用 72px 全彩房間圖示：書本、魔藥、大廳、天文台。
+- Files／Changes／Git 面板空狀態使用 72px 全彩房間圖示：書本、魔藥、天文台。
 - 終端背景使用新完成的寬版哥德式走廊圖，以 `cover` 滿版顯示；終端底色不透明度為 0.35。
 
 | 用途 | 色碼 |
@@ -38,7 +38,6 @@ herdr-app check mods/malfoid-spaces
 herdr-app check mods/malfoid-chrome
 herdr-app check mods/malfoid-files
 herdr-app check mods/malfoid-changes
-herdr-app check mods/malfoid-inbox
 herdr-app check mods/malfoid-git-graph
 herdr-app check mods/malfoid-music
 herdr-app check mods/malfoid-lyrics
@@ -50,7 +49,7 @@ herdr-app check mods/malfoid-notes
 
 ## 安裝與切換
 
-這版配合目前本機 Herdr 0.1.12，依賴已安裝的 `inbox`、`git-graph`，
+這版配合目前本機 Herdr 0.1.13，依賴已安裝的 `git-graph`，
 以及 Herdr 內建的 pane、files、changes、workspace-status、menu、new-menu、picker、machine-add、workspace-chrome。
 Files 面板使用隨附的 `mods/file-icons`（來自 herdr-mods，Material Icon Theme 圖示）：機器上已有就保留，`--update` 才覆蓋。
 
@@ -58,9 +57,9 @@ Files 面板使用隨附的 `mods/file-icons`（來自 herdr-mods，Material Ico
 node scripts/install.mjs
 ```
 
-安裝程式會預先確認依賴與撞名，只新增十一個 `malfoid-*` 模組、layout、預覽與 theme。
+安裝程式會預先確認依賴與撞名，只新增十個 `malfoid-*` 模組、layout、預覽與 theme。
 已存在任何同名目的路徑就停止；已安裝者更新用 `node scripts/install.mjs --update`，只覆寫 `malfoid-*` 路徑，修改會熱重載。
-安裝不切換畫面；先對安裝後的十一個模組執行原生檢查，再切換：
+安裝不切換畫面；先對安裝後的十個模組執行原生檢查，再切換：
 
 ```sh
 herdr-app check ~/.config/herdr-app/mods/malfoid-agents
@@ -69,7 +68,6 @@ herdr-app check ~/.config/herdr-app/mods/malfoid-spaces
 herdr-app check ~/.config/herdr-app/mods/malfoid-chrome
 herdr-app check ~/.config/herdr-app/mods/malfoid-files
 herdr-app check ~/.config/herdr-app/mods/malfoid-changes
-herdr-app check ~/.config/herdr-app/mods/malfoid-inbox
 herdr-app check ~/.config/herdr-app/mods/malfoid-git-graph
 herdr-app check ~/.config/herdr-app/mods/malfoid-music
 herdr-app check ~/.config/herdr-app/mods/malfoid-lyrics
@@ -85,8 +83,6 @@ herdr-app do layout.switch '{"name":"malfoid"}'
 - Spaces 沿用 Traveler 的 `git status`、`git rev-parse` 和 `hc machine ls` 查詢；遠端由 Herdr 既有連線執行。
 - Space 列顯示未提交檔案與未推送數量，不顯示「repo without a remote」提示。
 - Space 徽章按顯示順序循環：史萊哲林 → 葛來分多 → 雷文克勞 → 赫夫帕夫。主機標題與工作樹子列不計入徽章順序。
-- Watch 面板監看 `~/Downloads/` 第一層所有已下載完的檔案（內部 id 仍是 `inbox`）。PNG、JPG、JPEG、WebP、GIF、MP4、MOV、PDF 點一下用預設 App 開，其他檔案只在 Finder 顯示。有新檔時跳 toast，面板關著也會提醒。
-  將檔案放入該資料夾後會更新；空資料夾顯示 `0 files`。專案與 Downloads 裡的檔案需先放入此資料夾。
 - 側欄底部的 Apple Music 區塊（`malfoid-music`，僅 macOS）：沒歌時高度 0，有歌時長出曲名、時間、進度條與上一首／倒退 10 秒／播放暫停／快轉 10 秒／下一首。
   一個長駐 `osascript` daemon（herdr-core 終端 `apm-<雜湊>`）每秒讀 Music 並寫 `data/malfoid-music/state.json`，按鈕寫 `cmd.json`。
   第一次會跳出「允許控制 Music」的系統授權；若拒絕，區塊改顯示提示列，到系統設定 > 隱私權與安全性 > 自動化開啟。側欄收成窄條時區塊自動縮為 0。

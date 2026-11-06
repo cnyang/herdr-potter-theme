@@ -27,7 +27,7 @@ Tab 從 10 張照片頭像隨機配圖，以 Tab ID 存在 localStorage；改名
 
 `layouts/malfoid.json` 的 root row 包含 sidebar column 與 work column，
 sidebar 使用 `malfoid-chrome`、`malfoid-spaces`、`malfoid-agents`；work 使用 `malfoid-tabs`、
-Herdr 內建 pane／workspace-status，隨附的 mods/file-icons（Files 面板），以及 malfoid-changes／malfoid-inbox／malfoid-git-graph。
+Herdr 內建 pane／workspace-status，隨附的 mods/file-icons（Files 面板），以及 malfoid-changes／malfoid-git-graph。
 malfoid-* 面板為既有面板的主題專用複本，根底色使用 chrome 的 60% 不透明度，讓 panel 背景圖透出；file-icons 的本機版同樣用 `${t.chrome}99`。
 原本四個模組改自本機 Traveler，使用 `agents`、`spaces`、`panes`、`readTextFile`、`watchFolder`、`run`；
 Spaces 保留上游 Git 查詢與 `hc machine ls`。工作動作用 1 秒計時器重繪（僅在有 agent 工作時），文字與 PNG 才能同步，各卡依列表順序錯開；狀態燈使用 `.loop("opacity", ...)`，不使用高頻計時器。
@@ -35,7 +35,7 @@ Spaces 保留上游 Git 查詢與 `hc machine ls`。工作動作用 1 秒計時�
 
 ## Watch out
 
-此版本以本機 Herdr 0.1.12 為準，需要已安裝的 inbox 與 git-graph。
+此版本以本機 Herdr 0.1.13 為準，需要已安裝的 git-graph。
 各姿態為固定畫面，working 以兩張姿態（Working／Thinking）輪替，由時間決定，不代表 agent 實際在做什麼；沒有獨立 Thinking 狀態或八角色換裝。
 模組不能匯入自己資料夾以外的 JavaScript；不要跨模組共用 lib。
 原生 check 不涵蓋完整畫面與稍後載入的資料，必須搭配 `herdr-app status` 和 `herdr-app shot`。
@@ -44,6 +44,6 @@ Spaces 保留上游 Git 查詢與 `hc machine ls`。工作動作用 1 秒計時�
 ## Done when
 
 1. `node --test` 與 `node scripts/lint.mjs` 通過。
-2. 十一個 `herdr-app check` 通過，四態卡片的原生 gallery 檢查通過。
+2. 十個 `herdr-app check` 通過，四態卡片的原生 gallery 檢查通過。
 3. 切換後 `herdr-app status` 沒有新模組錯誤，截圖可見角色、學院徽章與墨綠面板。
 4. 角色卡沒有用量條或數值，Space 列縮小後 Git 資訊仍可見，新底圖上的終端內容仍清楚可讀。

@@ -8,8 +8,6 @@ import { spawnSync } from "node:child_process";
 import { STATES, stateFor, spritePath, nextSidebarWidth, frameColor, iconKind, statusText, phaseOffset, ACTION_MS, SIDEBAR_WIDTH } from "../mods/malfoid-agents/lib.js";
 import { PORTRAITS, assignPortraits } from "../mods/malfoid-tabs/portraits.js";
 import { housePath } from "../mods/malfoid-spaces/houses.js";
-import { openCommand, parseListing } from "../mods/malfoid-inbox/lib.js";
-import { listNames, newFilesNote } from "../mods/malfoid-tabs/downloads.js";
 import { clock, hash, position, blockHeight } from "../mods/malfoid-music/lib.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -138,32 +136,16 @@ test("agent cards draw the program icon the way its table entry says", () => {
   assert.equal(iconKind(undefined), null);
 });
 
-test("Inbox watches ~/Downloads", () => {
-  const source = readFileSync(join(root, "mods/malfoid-inbox/main.js"), "utf8");
-  assert.ok(source.includes('const INBOX_DIR = home() + "/Downloads";'));
-  assert.ok(!source.includes("mkdir"), "the mod must not create folders in Downloads");
-});
-
-test("Watch lists every finished file, but only media opens directly", () => {
-  const dir = "/d";
-  const items = parseListing(["1 5 /d/a.zip", "2 5 /d/run.command", "3 5 /d/b.pdf", "4 5 /d/c.crdownload", "5 5 /d/.DS_Store"].join("\n"), dir);
-  assert.deepEqual(items.map(i => [i.name, i.kind]), [["b.pdf", "pdf"], ["run.command", "file"], ["a.zip", "file"]]);
-  assert.deepEqual(openCommand("/d/b.pdf", dir).args, ["/d/b.pdf"]);
-  // 不是媒體檔只在 Finder 顯示，點一下不能執行 .command／.pkg。
-  assert.deepEqual(openCommand("/d/run.command", dir).args, ["-R", "/d/run.command"]);
-  assert.equal(openCommand("/d/sub/a.png", dir), null);
-});
-
-test("Watch notes only files that were not there before", () => {
-  assert.deepEqual(listNames("/d/a.zip\n/d/b.part\n/d/.DS_Store\n/d/sub/c.png\n", "/d"), ["a.zip"]);
-  assert.equal(newFilesNote(["a"], ["a"]), null);
-  assert.equal(newFilesNote(["a", "b"], ["a"]), null);
-  assert.deepEqual(newFilesNote(["a"], ["a", "b"]), { title: "New download", body: "b", level: "info" });
-  assert.equal(newFilesNote([], ["a", "b", "c"]).body, "a, b +1 more");
+test("Watch panel is gone: no mod, layout node, button or leftover files", () => {
+  assert.ok(!existsSync(join(root, "mods/malfoid-inbox")));
+  assert.ok(!existsSync(join(root, "mods/malfoid-tabs/downloads.js")));
+  assert.ok(!JSON.stringify(json("layouts/malfoid.json")).includes("inbox"));
+  const tabs = readFileSync(join(root, "mods/malfoid-tabs/main.js"), "utf8");
+  assert.ok(!/inbox|watchFolder|Downloads/.test(tabs));
 });
 
 test("each panel shows its room icon in full color when empty, never over an error", () => {
-  const panels = { "malfoid-files/main.js": "library", "malfoid-changes/main.js": "potions", "malfoid-inbox/main.js": "hall", "malfoid-git-graph/graph.js": "observatory" };
+  const panels = { "malfoid-files/main.js": "library", "malfoid-changes/main.js": "potions","malfoid-git-graph/graph.js": "observatory" };
   for (const [file, art] of Object.entries(panels)) {
     const path = `mods/malfoid-spaces/art/${art}.svg`;
     assert.ok(existsSync(join(root, path)), path);
@@ -177,7 +159,7 @@ test("each panel shows its room icon in full color when empty, never over an err
 
 test("panel buttons use bold 24px icons drawn for small sizes", () => {
   const tabs = readFileSync(join(root, "mods/malfoid-tabs/main.js"), "utf8");
-  for (const [id, label] of Object.entries({ files: "Files", changes: "Changes", graph: "Git", inbox: "Watch", lyrics: "Lyrics", notes: "Note" })) {
+  for (const [id, label] of Object.entries({ files: "Files", changes: "Changes", graph: "Git", lyrics: "Lyrics", notes: "Note" })) {
     const path = `mods/malfoid-tabs/art/panel-${id}.svg`;
     assert.ok(tabs.includes(`panelButton("${id}", "${label}", "${path}")`), id);
     const icon = readFileSync(join(root, path), "utf8");
@@ -239,21 +221,21 @@ test("installer refuses missing dependencies and name collisions before copying"
       mkdirSync(join(target, "mods", name), { recursive: true });
       writeFileSync(join(target, "mods", name, "main.js"), "fixture");
     };
-    for (const name of ["pane", "files", "changes", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "inbox", "git-graph"]) fixture(name);
+    for (const name of ["pane", "files", "changes", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "git-graph"]) fixture(name);
     // file-icons 隨主題附帶，不是前置依賴：全新機器沒有它也要能一併裝好
     assert.ok(!existsSync(join(target, "mods/file-icons")));
     const result = install();
     assert.equal(result.status, 0, result.stderr);
     assert.ok(existsSync(join(target, "themes/malfoid.json")));
     assert.ok(existsSync(join(target, "mods/file-icons/icons/folder.svg")));
-    for (const name of ["agents", "tabs", "spaces", "chrome", "files", "changes", "inbox", "git-graph", "music", "lyrics", "notes"]) {
+    for (const name of ["agents", "tabs", "spaces", "chrome", "files", "changes", "git-graph", "music", "lyrics", "notes"]) {
       assert.ok(existsSync(join(target, `mods/malfoid-${name}/main.js`)), name);
     }
     const file = join(target, "mods/malfoid-agents/main.js");
     writeFileSync(file, "user edit");
     assert.notEqual(install().status, 0);
     assert.equal(readFileSync(file, "utf8"), "user edit");
-    const other = join(target, "mods/inbox/main.js");
+    const other = join(target, "mods/git-graph/main.js");
     const update = spawnSync(process.execPath, [join(root, "scripts/install.mjs"), "--update"], { env: { ...process.env, HERDR_APP_HOME: target }, encoding: "utf8" });
     assert.equal(update.status, 0, update.stderr);
     assert.equal(readFileSync(file, "utf8"), readFileSync(join(root, "mods/malfoid-agents/main.js"), "utf8"));
@@ -266,7 +248,7 @@ test("installer keeps an existing file-icons unless --update", () => {
   const target = mkdtempSync(join(tmpdir(), "herdr-malfoid-icons-"));
   const run = (...args) => spawnSync(process.execPath, [join(root, "scripts/install.mjs"), ...args], { env: { ...process.env, HERDR_APP_HOME: target }, encoding: "utf8" });
   try {
-    for (const name of ["pane", "files", "changes", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "inbox", "git-graph", "file-icons"]) {
+    for (const name of ["pane", "files", "changes", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "git-graph", "file-icons"]) {
       mkdirSync(join(target, "mods", name), { recursive: true });
       writeFileSync(join(target, "mods", name, "main.js"), "fixture");
     }

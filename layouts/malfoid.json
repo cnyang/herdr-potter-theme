@@ -163,13 +163,6 @@
                       }
                     },
                     {
-                      "id": "inbox",
-                      "type": "block",
-                      "content": {
-                        "mod": "malfoid-inbox"
-                      }
-                    },
-                    {
                       "id": "graph",
                       "type": "block",
                       "content": {

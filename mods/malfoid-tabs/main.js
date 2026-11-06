@@ -1,9 +1,8 @@
 // 修改自 Traveler：魔法學院頭像、青綠焦點框與金色等待提示。
 import { View, div, svg, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { spaces, panes, run, openOverlay, theme, window, shared, layout, settings, exec, home, notify, watchFolder } from "herdr";
+import { spaces, panes, run, openOverlay, theme, window, shared, layout, settings } from "herdr";
 import { assignPortraits } from "./portraits.js";
-import { listNames, newFilesNote } from "./downloads.js";
 // localStorage 內容可能損毀；壞資料退回預設，不讓模組初始化失敗。
 function stored(key) {
   try {
@@ -26,25 +25,6 @@ export default class Tabs extends View {
     this.pressed = null;
     this.panels = stored("panels");
     this.portraits = stored("portraits");
-    cx.spawn(() => this.watchDownloads());
-  }
-
-  // 第一次成功列出只當基準，不提醒；讀不到時保留上一次結果，避免舊檔被當成新檔。
-  async watchDownloads() {
-    const dir = home() + "/Downloads";
-    const list = async () => {
-      const result = await exec("/usr/bin/find", [dir, "-mindepth", "1", "-maxdepth", "1", "-type", "f"]).catch(() => null);
-      return result?.code === 0 ? listNames(result.stdout, dir) : null;
-    };
-    let known = await list();
-    for (;;) {
-      try { await watchFolder(dir); } catch { return; }
-      const now = await list();
-      if (!now) continue;
-      const note = known && newFilesNote(known, now);
-      if (note) notify(note);
-      known = now;
-    }
   }
 
   // The side panel is remembered per space: switching shows that space's choice
@@ -114,7 +94,7 @@ export default class Tabs extends View {
       ? Math.max(10, (root.traffic_lights[0] + 64) / settings().zoom - (sidebar?.hidden ? 0 : sidebar?.size?.px ?? 0))
       : 10;
     const panel = find(root, "panel"), body = find(root, "panel-body");
-    const enabled = [...(shared("workspace.panels") ?? ["files", "changes"]), "inbox", "graph", "lyrics", "notes"];
+    const enabled = [...(shared("workspace.panels") ?? ["files", "changes"]), "graph", "lyrics", "notes"];
     this.syncPanel(space, panel, body, enabled);
     // 工具列專用 24px 粗線圖示，用 image() 保留金色。
     const panelButton = (id, label, icon) => {
@@ -135,7 +115,6 @@ export default class Tabs extends View {
       .when(enabled.includes("files"), el => el.child(panelButton("files", "Files", "mods/malfoid-tabs/art/panel-files.svg")))
       .when(enabled.includes("changes"), el => el.child(panelButton("changes", "Changes", "mods/malfoid-tabs/art/panel-changes.svg")))
       .child(panelButton("graph", "Git", "mods/malfoid-tabs/art/panel-graph.svg"))
-      .child(panelButton("inbox", "Watch", "mods/malfoid-tabs/art/panel-inbox.svg"))
       .child(panelButton("lyrics", "Lyrics", "mods/malfoid-tabs/art/panel-lyrics.svg"))
       .child(panelButton("notes", "Note", "mods/malfoid-tabs/art/panel-notes.svg"))
       .when(w?.buttons, el => el.child(button("minimize", w.platform === "windows" ? svg("mods/malfoid-tabs/win-min.svg").size(16) : "−", () => run("window.minimize")))
