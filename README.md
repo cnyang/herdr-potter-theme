@@ -86,6 +86,8 @@ herdr-app do layout.switch '{"name":"malfoid"}'
 - 側欄底部的 Apple Music 區塊（`malfoid-music`，僅 macOS）：沒歌時高度 0，有歌時長出曲名、時間、進度條與上一首／倒退 10 秒／播放暫停／快轉 10 秒／下一首。
   一個長駐 `osascript` daemon（herdr-core 終端 `apm-<雜湊>`）每秒讀 Music 並寫 `data/malfoid-music/state.json`，按鈕寫 `cmd.json`。
   第一次會跳出「允許控制 Music」的系統授權；若拒絕，區塊改顯示提示列，到系統設定 > 隱私權與安全性 > 自動化開啟。側欄收成窄條時區塊自動縮為 0。
+- 中央 pane 背景圖可輪播：把新圖放進 `mods/malfoid-chrome/`，路徑加進 `mods/malfoid-tabs/background.js` 的 `BACKGROUNDS`（預設一張，不換）；每 `ROTATE_MS`（10 分鐘）換下一張。
+  換圖用 `layout.set` 改寫 `~/.config/herdr-app/layouts/malfoid.json`，所以磁碟上的 layout 會與 repo 預設不同；`--update` 會還原成第一張。
 - 右側分頁列的 Lyrics 按鈕（音符圖示）打開歌詞面板（`malfoid-lyrics`）：顯示目前這首歌的歌詞，向自架的 lrclib 查詢。
   先 `/api/get` 精確比對、404 再 `/api/search`（做法取自 MusicTUI）；有時間軸的歌詞高亮目前這句並置中，純文字歌詞可自己捲動。
   端點讀 `~/.config/music/lyrics.json` 的 `{"endpoint": "http://host:3300"}`（與 MusicTUI 共用）；沒設定就顯示提示，不會退回公開的 lrclib.net。

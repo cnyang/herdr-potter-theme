@@ -9,6 +9,7 @@ import { STATES, stateFor, spritePath, nextSidebarWidth, frameColor, iconKind, s
 import { PORTRAITS, assignPortraits } from "../mods/malfoid-tabs/portraits.js";
 import { housePath } from "../mods/malfoid-spaces/houses.js";
 import { clock, hash, position, blockHeight } from "../mods/malfoid-music/lib.js";
+import { BACKGROUNDS, nextImage } from "../mods/malfoid-tabs/background.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const json = path => JSON.parse(readFileSync(join(root, path), "utf8"));
@@ -142,6 +143,17 @@ test("Watch panel is gone: no mod, layout node, button or leftover files", () =>
   assert.ok(!JSON.stringify(json("layouts/malfoid.json")).includes("inbox"));
   const tabs = readFileSync(join(root, "mods/malfoid-tabs/main.js"), "utf8");
   assert.ok(!/inbox|watchFolder|Downloads/.test(tabs));
+});
+
+test("background rotation walks the list, wraps, and restarts from the first when the current image is unknown", () => {
+  const list = ["a", "b", "c"];
+  assert.equal(nextImage("a", list), "b");
+  assert.equal(nextImage("c", list), "a");
+  assert.equal(nextImage("x", list), "a");
+  assert.equal(nextImage("a", ["a"]), null);
+  for (const path of BACKGROUNDS) assert.ok(existsSync(join(root, path)), path);
+  const find = (node, id) => node.id === id ? node : (node.children ?? []).map(child => find(child, id)).find(Boolean);
+  assert.ok(BACKGROUNDS.includes(find(json("layouts/malfoid.json"), "main").content.pane.background.image), "layout default must be in the rotation list");
 });
 
 test("each panel shows its room icon in full color when empty, never over an error", () => {

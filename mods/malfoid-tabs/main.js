@@ -3,6 +3,7 @@ import { View, div, svg, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import { spaces, panes, run, openOverlay, theme, window, shared, layout, settings } from "herdr";
 import { assignPortraits } from "./portraits.js";
+import { ROTATE_MS, nextImage } from "./background.js";
 // localStorage 內容可能損毀；壞資料退回預設，不讓模組初始化失敗。
 function stored(key) {
   try {
@@ -25,6 +26,16 @@ export default class Tabs extends View {
     this.pressed = null;
     this.panels = stored("panels");
     this.portraits = stored("portraits");
+    cx.timer.every(ROTATE_MS, () => this.rotateBackground());
+  }
+
+  // 改中央 pane 的 image 後用 layout.set 寫回整棵樹（個人 layout 才允許）；換圖後磁碟上的 layout 會與 repo 預設不同，--update 會還原。
+  rotateBackground() {
+    const tree = JSON.parse(JSON.stringify(layout())), bg = find(tree, "main")?.content?.pane?.background;
+    const next = bg && nextImage(bg.image);
+    if (!next) return;
+    bg.image = next;
+    run("layout.set", { layout: tree });
   }
 
   // The side panel is remembered per space: switching shows that space's choice
