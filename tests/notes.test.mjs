@@ -55,7 +55,7 @@ test("notes panel is wired: layout block, mod title, tab button state and the sh
   const block = body.children.find(n => n.id === "notes");
   assert.equal(block.content.mod, "malfoid-notes");
   const tabs = readFileSync(join(root, "mods/malfoid-tabs/main.js"), "utf8");
-  assert.match(tabs, /"lyrics", "notes"\]/, "panel must be in the remembered-panels list");
+  assert.match(tabs, /"lyrics", "notes"[,\]]/, "panel must be in the remembered-panels list");
   const main = readFileSync(join(root, "mods/malfoid-notes/main.js"), "utf8");
   assert.ok(main.includes("data/theme-notes"), "Malfoid and Husky share one note file");
   // 讀檔失敗時 ready 必須維持 false，flush 才不會把空白內容寫回去蓋掉筆記。

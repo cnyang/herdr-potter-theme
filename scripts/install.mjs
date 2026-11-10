@@ -8,7 +8,7 @@ const target = process.env.HERDR_APP_HOME || join(homedir(), ".config", "herdr-a
 const files = [
   "mods/malfoid-agents", "mods/malfoid-tabs", "mods/malfoid-spaces", "mods/malfoid-chrome",
   "mods/malfoid-files", "mods/malfoid-changes", "mods/malfoid-git-graph",
-  "mods/malfoid-music", "mods/malfoid-lyrics", "mods/malfoid-notes", "mods/file-icons", "layouts/malfoid.json", "layouts/malfoid.svg", "themes/malfoid.json",
+  "mods/malfoid-music", "mods/malfoid-lyrics", "mods/malfoid-notes", "mods/malfoid-calendar", "mods/file-icons", "layouts/malfoid.json", "layouts/malfoid.svg", "themes/malfoid.json",
 ];
 const update = process.argv.includes("--update");
 // file-icons 與其他主題共用：已存在就保留（不算撞名），只有 --update 才覆蓋

@@ -182,6 +182,13 @@
                       "content": {
                         "mod": "malfoid-notes"
                       }
+                    },
+                    {
+                      "id": "calendar",
+                      "type": "block",
+                      "content": {
+                        "mod": "malfoid-calendar"
+                      }
                     }
                   ],
                   "active": "files"

@@ -105,7 +105,7 @@ export default class Tabs extends View {
       ? Math.max(10, (root.traffic_lights[0] + 64) / settings().zoom - (sidebar?.hidden ? 0 : sidebar?.size?.px ?? 0))
       : 10;
     const panel = find(root, "panel"), body = find(root, "panel-body");
-    const enabled = [...(shared("workspace.panels") ?? ["files", "changes"]), "graph", "lyrics", "notes"];
+    const enabled = [...(shared("workspace.panels") ?? ["files", "changes"]), "graph", "lyrics", "notes", "calendar"];
     this.syncPanel(space, panel, body, enabled);
     // 工具列專用 24px 粗線圖示，用 image() 保留金色。
     const panelButton = (id, label, icon) => {
@@ -128,6 +128,7 @@ export default class Tabs extends View {
       .child(panelButton("graph", "Git", "mods/malfoid-tabs/art/panel-graph.svg"))
       .child(panelButton("lyrics", "Lyrics", "mods/malfoid-tabs/art/panel-lyrics.svg"))
       .child(panelButton("notes", "Note", "mods/malfoid-tabs/art/panel-notes.svg"))
+      .child(panelButton("calendar", "Calendar", "mods/malfoid-tabs/art/panel-calendar.svg"))
       .when(w?.buttons, el => el.child(button("minimize", w.platform === "windows" ? svg("mods/malfoid-tabs/win-min.svg").size(16) : "−", () => run("window.minimize")))
         .child(button("maximize", w.platform === "windows" ? svg(`mods/malfoid-tabs/${w.maximized ? "win-restore" : "win-max"}.svg`).size(16) : "□", () => run("window.maximize")))
         .child(button("close-window", w.platform === "windows" ? svg("mods/malfoid-tabs/win-close.svg").size(16) : svg("mods/pane/close.svg").size(13), () => run("window.close"))));
