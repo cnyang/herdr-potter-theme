@@ -13,6 +13,18 @@ import * as fs from "fs/promises";
 import { hc, appHome, readTextFile, watchFolder, theme, run, layout } from "herdr";
 import { SEEK_SECONDS, blockHeight, clock, hash, position } from "./lib.js";
 
+import { theme as cornerTheme } from "herdr";
+import { div as cornerDiv } from "gpui-kit";
+
+// 節點 background 的圖片不吃 radius，方角會露在圓角外；從外側用 canvas 色粗框蓋住四個角。
+// r = 開口半徑（卡片圓角）；bottom=false 只遮上緣（pane 標題列）；border=true 補 1px 邊框（面板本身沒畫邊框時）。
+const withCorners = (el, r, bottom = true, border = false) => {
+  const t = cornerTheme(), w = 24;
+  return cornerDiv().relative().size_full().overflow_hidden().child(el)
+    .child(cornerDiv().absolute().top(-w).left(-w).right(-w).bottom(bottom ? -w : -400).border(w).border_color(t.canvas).rounded(r + w))
+    .when(border, (e) => e.child(cornerDiv().absolute().top(0).left(0).right(0).bottom(0).rounded(r).border_1().border_color(t.border)));
+};
+
 const NAME = "malfoid-music";
 const BLOCK = "music";
 const ICON = (name) => `mods/${NAME}/${name}.svg`;
@@ -40,7 +52,7 @@ function find(node, id) {
 // 側欄收成窄條（< 160 px）時五顆按鈕放不下：與 malfoid-chrome 一樣以寬度判斷，不看旗標。
 const narrow = () => (find(layout(), "sidebar")?.size?.px ?? Infinity) < 160;
 
-export default class MalfoidMusic extends View {
+class MalfoidMusic extends View {
   init(_props, cx) {
     this.state = null; // { title, artist, paused, seconds, duration, at } 或 { error } 或 null
     // 兩次寫入之間由本 mod 自己推進時鐘，只有播放中才重畫；順便讓區塊跟上側欄寬度變化。
@@ -108,6 +120,9 @@ export default class MalfoidMusic extends View {
     if (!node) return;
     if (node.hidden) run("layout.show", { id: BLOCK });
     if (node.size?.px !== px) run("layout.resize", { id: BLOCK, px });
+    // 卡片前的 12px 空隙跟著顯示／收起：側欄 gap 為 0，空隙由 music-gap 節點負責，閒置時不留白。
+    const gap = find(layout(), "music-gap"), want = px > 0 ? 12 : 0;
+    if (gap && gap.size?.px !== want) run("layout.resize", { id: "music-gap", px: want });
   }
 
   async daemonLive() {
@@ -126,8 +141,8 @@ export default class MalfoidMusic extends View {
     const t = theme(), s = this.state;
     // 底色與側欄其他區塊相同（chrome + alpha），讓側欄底圖透出。
     const box = v_flex().id(NAME).size_full().px(12).justify_center().gap(6).overflow_hidden()
-      .bg(`${t.chrome}c8`).border_t(1).border_color(t.border).text_size(12).text_color(t.muted);
-    if (!s) return box;
+      .rounded(14).bg(`${t.chrome}c8`).border_1().border_color(t.border).text_size(12).text_color(t.muted);
+    if (!s) return div().size_full();
     if (s.error === "denied") {
       return box.child(h_flex().gap(8).items_center()
         .child(svg(ICON("music")).size(12).flex_none().text_color(t.dim))
@@ -164,4 +179,8 @@ export default class MalfoidMusic extends View {
       .child(h_flex().gap(6).items_center().justify_center().children(CONTROLS.map(([id, icon, tip]) =>
         id === "toggle" ? button(id, s.paused ? "play" : "pause", s.paused ? "Play" : "Pause") : button(id, icon, tip))));
   }
+}
+
+export default class extends MalfoidMusic {
+  render(cx) { return withCorners(super.render(cx), 14); }
 }

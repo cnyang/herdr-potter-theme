@@ -9,6 +9,18 @@ import { v_flex, h_flex } from "gpui-base";
 import { spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout } from "herdr";
 import { housePath } from "./houses.js";
 
+import { theme as cornerTheme } from "herdr";
+import { div as cornerDiv } from "gpui-kit";
+
+// 節點 background 的圖片不吃 radius，方角會露在圓角外；從外側用 canvas 色粗框蓋住四個角。
+// r = 開口半徑（卡片圓角）；bottom=false 只遮上緣（pane 標題列）；border=true 補 1px 邊框（面板本身沒畫邊框時）。
+const withCorners = (el, r, bottom = true, border = false) => {
+  const t = cornerTheme(), w = 24;
+  return cornerDiv().relative().size_full().overflow_hidden().child(el)
+    .child(cornerDiv().absolute().top(-w).left(-w).right(-w).bottom(bottom ? -w : -400).border(w).border_color(t.canvas).rounded(r + w))
+    .when(border, (e) => e.child(cornerDiv().absolute().top(0).left(0).right(0).bottom(0).rounded(r).border_1().border_color(t.border)));
+};
+
 function find(node, id) {
   if (node?.id === id) return node;
   for (const child of node?.children ?? []) {
@@ -53,7 +65,7 @@ export function tone(t, status) {
   return t[status] ?? t.unknown;
 }
 
-export default class Spaces extends View {
+class Spaces extends View {
   init(_props, cx) {
     this.git = {}; // where() -> { name, branch, ahead, behind, repo, linked }, null: not a repo
     this.checked = {}; // where() -> when it was last looked at
@@ -416,4 +428,8 @@ export default class Spaces extends View {
         .on_mouse_up("left", (_e, cx) => { this.pressed = null; cx.notify(); })
         .children(this.grouped(t, collapsed)));
   }
+}
+
+export default class extends Spaces {
+  render(cx) { return withCorners(super.render(cx), 13); }
 }

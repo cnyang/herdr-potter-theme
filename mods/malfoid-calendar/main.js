@@ -11,6 +11,18 @@ import * as fs from "fs/promises";
 import { appHome, exec, layout, readTextFile, theme } from "herdr";
 import { calendarsFrom, dayKey, expand, parseICS } from "./lib.js";
 
+import { theme as cornerTheme } from "herdr";
+import { div as cornerDiv } from "gpui-kit";
+
+// 節點 background 的圖片不吃 radius，方角會露在圓角外；從外側用 canvas 色粗框蓋住四個角。
+// r = 開口半徑（卡片圓角）；bottom=false 只遮上緣（pane 標題列）；border=true 補 1px 邊框（面板本身沒畫邊框時）。
+const withCorners = (el, r, bottom = true, border = false) => {
+  const t = cornerTheme(), w = 24;
+  return cornerDiv().relative().size_full().overflow_hidden().child(el)
+    .child(cornerDiv().absolute().top(-w).left(-w).right(-w).bottom(bottom ? -w : -400).border(w).border_color(t.canvas).rounded(r + w))
+    .when(border, (e) => e.child(cornerDiv().absolute().top(0).left(0).right(0).bottom(0).rounded(r).border_1().border_color(t.border)));
+};
+
 const BLOCK = "calendar"; // layout 裡 panel-body 的子區塊 id
 // 沒指定顏色的日曆依序用這些 theme token：每個 theme 都調過對比，深色（Tomb Raider、Malfoid）淺色（Husky）都看得清楚
 const PALETTE = ["working", "blocked", "done", "unknown"];
@@ -45,7 +57,7 @@ const pad = (n) => String(n).padStart(2, "0");
 const hm = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-export default class MalfoidCalendar extends View {
+class MalfoidCalendar extends View {
   init(_props, cx) {
     const now = new Date();
     this.month = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -168,9 +180,13 @@ export default class MalfoidCalendar extends View {
         .child(this.grid(t, byDay, dayKey(new Date())))
         .child(this.agenda(t, byDay.get(this.selected) ?? []));
     }
-    return v_flex().id("calendar").size_full().min_h(0).bg(`${t.chrome}99`).text_color(t.foreground).text_size(15)
+    return v_flex().id("calendar").size_full().min_h(0).rounded(14).overflow_hidden().bg(`${t.chrome}99`).border_1().border_color(t.border).text_color(t.foreground).text_size(15)
       .child(header)
       .child(body)
       .when(Boolean(this.err && this.state === "ready"), (el) => el.child(div().flex_none().px(14).py(6).text_size(13).text_color(t.blocked).child(this.err)));
   }
+}
+
+export default class extends MalfoidCalendar {
+  render(cx) { return withCorners(super.render(cx), 14); }
 }

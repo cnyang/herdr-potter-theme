@@ -313,15 +313,19 @@ test("music daemon name hash is FNV-1a so an edited daemon.js gets a new termina
   assert.notEqual(hash("daemon v1"), hash("daemon v2"));
 });
 
-test("music mod sits in the sidebar as a collapsed block, ships its icons and keeps the crash guards", () => {
+test("music mod is its own floating card below the lists, ships its icons and keeps the crash guards", () => {
+  // 浮動卡片版：側欄 gap 為 0，卡片間的 12px 由空節點負責；music-gap 跟著 music 高度 0↔12，閒置時不會多出空隙。
   const sidebar = json("layouts/malfoid.json").children.find(n => n.id === "sidebar");
-  const ids = sidebar.children.map(n => n.id);
-  assert.deepEqual(ids.slice(ids.indexOf("music") - 1, ids.indexOf("music") + 2), ["sidebar-lists", "music", "sidebar-footer"]);
+  assert.equal(sidebar.gap, 0);
+  assert.deepEqual(sidebar.children.map(n => n.id).slice(-4), ["music-gap", "music", "gap-footer", "sidebar-footer"]);
+  const gap = sidebar.children.find(n => n.id === "music-gap");
+  assert.deepEqual([gap.size.px, gap.min], [0, 0]);
   const block = sidebar.children.find(n => n.id === "music");
   assert.equal(block.content.mod, "malfoid-music");
   assert.deepEqual([block.size.px, block.min], [0, 0]);
   const main = readFileSync(join(root, "mods/malfoid-music/main.js"), "utf8");
   assert.ok(main.includes('const BLOCK = "music"'), "mod must resize the layout block with this id");
+  assert.ok(main.includes('"music-gap"'), "mod must resize the gap node together with the block");
   for (const icon of ["music", "skip-back", "rewind", "play", "pause", "fast-forward", "skip-forward"]) {
     assert.ok(existsSync(join(root, `mods/malfoid-music/${icon}.svg`)), icon);
     assert.ok(main.includes(`"${icon}"`), `${icon} unused`);

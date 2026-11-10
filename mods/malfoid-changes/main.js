@@ -3,6 +3,18 @@ import { View, div, image } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input, Scrollbar, v_virtual_list } from "gpui-base";
 import { spaces, panes, focused, exec, readTextFile, watchFolder, theme, settings } from "herdr";
 
+import { theme as cornerTheme } from "herdr";
+import { div as cornerDiv } from "gpui-kit";
+
+// 節點 background 的圖片不吃 radius，方角會露在圓角外；從外側用 canvas 色粗框蓋住四個角。
+// r = 開口半徑（卡片圓角）；bottom=false 只遮上緣（pane 標題列）；border=true 補 1px 邊框（面板本身沒畫邊框時）。
+const withCorners = (el, r, bottom = true, border = false) => {
+  const t = cornerTheme(), w = 24;
+  return cornerDiv().relative().size_full().overflow_hidden().child(el)
+    .child(cornerDiv().absolute().top(-w).left(-w).right(-w).bottom(bottom ? -w : -400).border(w).border_color(t.canvas).rounded(r + w))
+    .when(border, (e) => e.child(cornerDiv().absolute().top(0).left(0).right(0).bottom(0).rounded(r).border_1().border_color(t.border)));
+};
+
 function location() {
   const space = spaces().find((s) => s.active), f = focused();
   const pane = f?.pane ? panes().find(p => p.pane === f.pane) : null;
@@ -29,7 +41,7 @@ function diffRows(lines) {
   });
 }
 
-export default class Changes extends View {
+class Changes extends View {
   init(_props, cx) {
     this.files = []; this.rows = []; this.diffWidth = 0; this.message = ""; this.handle = cx.focus_handle();
     this.input = InputState.new({ placeholder: "Commit message" });
@@ -177,7 +189,7 @@ export default class Changes extends View {
     if (key() !== this.context) this.refresh(cx);
     const t = theme(), add = this.files.reduce((n, f) => n + f.add, 0), del = this.files.reduce((n, f) => n + f.del, 0);
     const enabled = Boolean(this.message.trim() && this.root && !this.busy && !this.loading);
-    return v_flex().id("changes").size_full().min_h(0).rounded(10).overflow_hidden().bg(`${t.chrome}99`).border_1().border_color(t.border).text_color(t.foreground).text_size(13).track_focus(this.handle)
+    return v_flex().id("changes").size_full().min_h(0).rounded(14).overflow_hidden().bg(`${t.chrome}99`).border_1().border_color(t.border).text_color(t.foreground).text_size(13).track_focus(this.handle)
       .on_key_down((e, cx) => {
         if (e.key === "escape" && this.typing) { this.typing = false; this.handle.focus(); cx.stop_propagation(); cx.notify(); }
       })
@@ -207,4 +219,8 @@ export default class Changes extends View {
         .child(div().id("commit-message").flex_1().min_w(0).h(32).px(10).flex().items_center().rounded(8).border_1().border_color(this.typing ? t.accent : t.border).cursor_text().on_mouse_down("left", (_e, cx) => cx.stop_propagation()).child(Input.new(this.input).h_full().text_size(12).text_color(t.foreground)))
         .child(div().id("commit").h(32).px(14).flex().items_center().rounded(8).bg(enabled ? t.solid : t.raised).text_color(enabled ? t.solid_foreground : t.dim).text_size(12).when(enabled, (e) => e.cursor_pointer()).on_click((_e, cx) => this.commit(cx)).child(this.busy ? "Committing…" : "Commit")));
   }
+}
+
+export default class extends Changes {
+  render(cx) { return withCorners(super.render(cx), 14); }
 }

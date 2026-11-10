@@ -77,14 +77,15 @@ export default class Tabs extends View {
       localStorage.setItem("portraits", JSON.stringify(portraits));
     }
     const stop = (_e, cx) => cx.stop_propagation();
-    const button = (id, label, action) => div().id(id).size(26).flex_none().flex().items_center().justify_center().text_color(t.dim).hover(s => s.bg(t.hover).text_color(t.foreground))
+    const button = (id, label, action, pill) => div().id(id).size(pill ? 36 : 26).flex_none().flex().items_center().justify_center().text_color(t.dim)
+      .when(pill, el => el.rounded(8).text_size(18).bg(t.surface).border(1).border_color(t.border)).hover(s => s.bg(t.hover).text_color(t.foreground))
       .on_mouse_down("left", stop).on_click(action).child(label);
     const allPanes = panes(); // 每次讀取都會複製全部 pane，整個 render 只讀一次。
     const item = (c, i) => {
       const program = allPanes.find(p => p.tab === c.id && p.program?.agent)?.program ?? allPanes.find(p => p.tab === c.id)?.program;
       const name = /^tb\d+$/.test(c.name) ? program?.name ?? "Terminal" : c.name;
-      return h_flex().id(`tab-${c.id}`).h(34).rounded(7).px(8).gap(7).items_center().flex_none().text_size(12.8)
-        .border(1).border_color(c.status === "blocked" ? t.blocked : c.active ? t.accent : t.chrome).bg(c.active ? t.raised : t.chrome).text_color(c.active ? t.foreground : t.muted)
+      return h_flex().id(`tab-${c.id}`).h(42).rounded(9).px(11).gap(8).items_center().flex_none().text_size(13.5)
+        .border(1).border_color(c.status === "blocked" ? t.blocked : c.active ? t.accent : t.border).bg(c.active ? t.raised : t.surface).text_color(c.active ? t.foreground : t.muted)
         .hover(s => s.bg(t.hover))
         .on_mouse_down("left", (e, cx) => { cx.stop_propagation(); this.pressed = i; if (e.click_count === 2) run("tab.rename", { id: c.id }); })
         .on_mouse_up("left", () => {
@@ -93,7 +94,7 @@ export default class Tabs extends View {
           else run("tab.select", { id: c.id });
         })
         .on_mouse_down("right", (_e, cx) => { cx.stop_propagation(); openOverlay({ mod: "menu", kind: "popup", width: 200, props: { tab: "tab", target: { id: c.id, space: space.id } } }); })
-        .child(image(portraits[c.id]).size(26).rounded(5).flex_none())
+        .child(image(portraits[c.id]).size(30).rounded(6).flex_none())
         .child(div().max_w(170).truncate().child(c.zoomed ? `${name} Z` : name))
         .when(c.status === "working", el => el.child(svg("mods/workspace-chrome/spinner.svg").size(12).flex_none().text_color(t.working).spin(900)))
         .when(c.status === "blocked" || c.status === "done", el => el.child(div().size(6).rounded(3).bg(t[c.status])))
@@ -110,19 +111,19 @@ export default class Tabs extends View {
     // 工具列專用 24px 粗線圖示，用 image() 保留金色。
     const panelButton = (id, label, icon) => {
       const on = panel && !panel.hidden && body?.active === id;
-      return h_flex().id(`panel-${id}`).h(26).px(8).gap(5).flex_none().items_center()
-        .text_size(12).bg(on ? t.selected : t.chrome).text_color(on ? t.foreground : t.muted)
+      return h_flex().id(`panel-${id}`).h(36).px(12).gap(6).flex_none().items_center()
+        .text_size(13).rounded(8).border(1).border_color(on ? t.accent : t.border).bg(on ? t.selected : t.surface).text_color(on ? t.foreground : t.muted)
         .hover(s => s.bg(t.hover)).on_mouse_down("left", stop)
         .on_click(() => {
           if (on) run("layout.hide", { id: "panel" });
           else { run("layout.select", { stack: "panel-body", child: id }); run("layout.show", { id: "panel" }); }
         }).child(image(icon).size(24).flex_none()).child(label);
     };
-    return h_flex().size_full().min_w(0).px(10).pl(lightsPadding).gap(3).items_center().bg(t.chrome).border_b(1).border_color(t.border)
+    return h_flex().size_full().min_w(0).px(10).pl(lightsPadding).gap(3).items_center()
       .on_mouse_up("left", () => { this.pressed = null; })
       .on_scroll_wheel(e => { if (Math.abs(e.delta.y) >= 1) run(e.delta.y > 0 ? "tab.prev" : "tab.next"); })
       .child(h_flex().id("tab-scroll").flex_1().min_w(0).h_full().items_center().gap(3).overflow_x_scrollbar().children(shown.map(item)))
-      .child(button("tab-new", "+", () => openOverlay({ mod: "new-menu", kind: "popup", width: 250, height: 512 })))
+      .child(button("tab-new", "+", () => openOverlay({ mod: "new-menu", kind: "popup", width: 250, height: 512 }), true))
       .when(enabled.includes("files"), el => el.child(panelButton("files", "Files", "mods/malfoid-tabs/art/panel-files.svg")))
       .when(enabled.includes("changes"), el => el.child(panelButton("changes", "Changes", "mods/malfoid-tabs/art/panel-changes.svg")))
       .child(panelButton("graph", "Git", "mods/malfoid-tabs/art/panel-graph.svg"))

@@ -8,6 +8,18 @@ import { v_flex, h_flex, Editor, EditorState } from "gpui-base";
 import { spaces, panes, focused, exec, readTextFile, watchFolder, theme, settings, window, props } from "herdr";
 import ICONS from "./icons.js";
 
+import { theme as cornerTheme } from "herdr";
+import { div as cornerDiv } from "gpui-kit";
+
+// 節點 background 的圖片不吃 radius，方角會露在圓角外；從外側用 canvas 色粗框蓋住四個角。
+// r = 開口半徑（卡片圓角）；bottom=false 只遮上緣（pane 標題列）；border=true 補 1px 邊框（面板本身沒畫邊框時）。
+const withCorners = (el, r, bottom = true, border = false) => {
+  const t = cornerTheme(), w = 24;
+  return cornerDiv().relative().size_full().overflow_hidden().child(el)
+    .child(cornerDiv().absolute().top(-w).left(-w).right(-w).bottom(bottom ? -w : -400).border(w).border_color(t.canvas).rounded(r + w))
+    .when(border, (e) => e.child(cornerDiv().absolute().top(0).left(0).right(0).bottom(0).rounded(r).border_1().border_color(t.border)));
+};
+
 function location() {
   const space = spaces().find(s => s.active), f = focused();
   const pane = f?.pane ? panes().find(p => p.pane === f.pane) : null;
@@ -54,7 +66,7 @@ async function directory(path, on) {
   return out;
 }
 
-export default class Files extends View {
+class Files extends View {
   init(_props, cx) {
     this.entries = new Map(); this.folders = new Set(); this.pending = new Set(); this.marks = {};
     this.refresh(cx);
@@ -172,7 +184,7 @@ export default class Files extends View {
     // 本機修改:底色加 alpha 透出 layout 的面板背景圖。預設 99(約 60%,同 malfoid-files);
     // layout 可用 props.alpha(兩位十六進位)覆寫,背景圖很淺的主題(husky)要更低才看得出透明。
     const a = /^[\da-f]{2}$/i.test(props()?.alpha ?? "") ? props().alpha : "99";
-    return v_flex().id("files").size_full().min_h(0).rounded(10).overflow_hidden().bg(`${t.chrome}${a}`).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
+    return v_flex().id("files").size_full().min_h(0).rounded(14).overflow_hidden().bg(`${t.chrome}${a}`).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
       .child(h_flex().h(42).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
         .when(Boolean(this.file), el => el.child(div().id("files-back").w(20).cursor_pointer().text_color(t.muted).on_click((_e, cx) => { this.show(null); cx.notify(); }).child("←")))
         .child(div().font_semibold().child("Files"))
@@ -184,4 +196,8 @@ export default class Files extends View {
         .when(this.limited, el => el.child(div().p(8).text_size(11).text_color(t.dim).child("File list limited to 500 entries per folder and 5,000 total")))))
       .when(Boolean(this.file), el => el.child(this.code ? Editor.new(this.code).flex_1().min_h(0) : div().p(12).text_color(t.dim).child(this.fileError || "Loading file…")));
   }
+}
+
+export default class extends Files {
+  render(cx) { return withCorners(super.render(cx), 14); }
 }

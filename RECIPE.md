@@ -11,7 +11,7 @@
 每個 Space 列高 60px，學院徽章為 48px；依顯示順序循環使用史萊哲林、葛來分多、雷文克勞、赫夫帕夫，工作樹子列維持 28px 並使用原本分支圖示。
 每張角色卡使用 72×96 圖片、6px 內距，只顯示名稱、狀態與程式名稱。
 四個面板空狀態以 `image()` 顯示 `malfoid-spaces/art/` 的 72px 房間圖示，錯誤時不顯示。
-Spaces 與 Agents 以 2px accent 分隔線分開；右側 panel 使用 sidebar.png 作背景。
+Spaces 與 Agents 為兩張獨立卡片，間距 12px；右側 panel 使用 sidebar.png 作背景。
 
 ## How it behaves
 
@@ -44,6 +44,6 @@ Spaces 保留上游 Git 查詢與 `hc machine ls`。工作動作用 1 秒計時�
 ## Done when
 
 1. `node --test` 與 `node scripts/lint.mjs` 通過。
-2. 十個 `herdr-app check` 通過，四態卡片的原生 gallery 檢查通過。
+2. 十二個 `herdr-app check` 通過，四態卡片的原生 gallery 檢查通過。
 3. 切換後 `herdr-app status` 沒有新模組錯誤，截圖可見角色、學院徽章與墨綠面板。
 4. 角色卡沒有用量條或數值，Space 列縮小後 Git 資訊仍可見，新底圖上的終端內容仍清楚可讀。

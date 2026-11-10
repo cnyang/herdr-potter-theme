@@ -8,7 +8,8 @@ Herdr 原生桌面主題，以 `malfoid/` 角色照片和「奇幻女巫角色�
 ## 畫面與狀態
 
 - 190px 側欄、60px Space 列搭配 48px 四學院徽章，以及四態角色卡；收合時改用頭像。
-- Spaces 與 Agents 之間使用 2px 青綠分隔線；右側四種面板共用左側欄底圖，覆以半透明墨綠底色。
+- Islands 浮動卡片（參考 CodeyPacker/herdr-mods 的 islands）：畫布留 12px 邊、卡片間距 12px；Brand、Spaces、Agents、設定列、狀態列、右側面板各自是 14px 圓角、1px 邊框的獨立卡片；終端 pane 的底圖與終端底色由 Herdr 原生繪製、mod 蓋不住方角，所以 pane 圓角縮為 8px。分頁列無底色、分頁與按鈕為膠囊。Herdr 不會依節點圓角裁切 mod 的滿版底色，所以內建 `pane`、`workspace-status` 改用本主題的 `malfoid-pane`、`malfoid-status` clone；節點的底圖不吃 `radius`，所以各 mod 另外用 canvas 色粗框蓋住圖片的四個方角；Apple Music 區塊是獨立卡片，卡片前的 12px 空隙由 `music-gap` 節點跟著縮放，沒歌時不留白。macOS 紅黃綠按鈕位置由 root 的 `traffic_lights` 決定（以 zoom 1.2 對準 brand 卡片中心）。
+- Spaces 與 Agents 各自為獨立卡片（不再用分隔線）；右側四種面板共用左側欄底圖，覆以半透明墨綠底色。
 - 閒置抱書、等待指示托球、完成微笑舉杖；工作中每 3 秒切換「施法中」「思考中」，文字與姿態同步，相鄰 agent 交錯顯示不同動作。
 - 工作姿態與其他狀態都使用 PNG，6 秒一輪；工作狀態燈以原生 opacity 動畫呼吸。
 - 所有分頁均隨機分配角色頭像，包含一般終端與非 AI 程式；配圖按 Tab ID 保存，10 張用完才重複。Files／Changes／Git 面板沿用本機既有操作。
@@ -57,9 +58,9 @@ Files 面板使用隨附的 `mods/file-icons`（來自 herdr-mods，Material Ico
 node scripts/install.mjs
 ```
 
-安裝程式會預先確認依賴與撞名，只新增十個 `malfoid-*` 模組、layout、預覽與 theme。
+安裝程式會預先確認依賴與撞名，只新增十二個 `malfoid-*` 模組、layout、預覽與 theme。
 已存在任何同名目的路徑就停止；已安裝者更新用 `node scripts/install.mjs --update`，只覆寫 `malfoid-*` 路徑，修改會熱重載。
-安裝不切換畫面；先對安裝後的十個模組執行原生檢查，再切換：
+安裝不切換畫面；先對安裝後的十二個模組執行原生檢查，再切換：
 
 ```sh
 herdr-app check ~/.config/herdr-app/mods/malfoid-agents

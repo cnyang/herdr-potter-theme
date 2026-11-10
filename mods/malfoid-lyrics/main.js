@@ -9,6 +9,18 @@ import { h_flex, v_flex, v_virtual_list, Scrollbar, VirtualListScrollHandle } fr
 import { appHome, exec, home, layout, readTextFile, theme } from "herdr";
 import { curlArgs, currentIndex, endpointFrom, lookup, parseCurl, position } from "./lib.js";
 
+import { theme as cornerTheme } from "herdr";
+import { div as cornerDiv } from "gpui-kit";
+
+// 節點 background 的圖片不吃 radius，方角會露在圓角外；從外側用 canvas 色粗框蓋住四個角。
+// r = 開口半徑（卡片圓角）；bottom=false 只遮上緣（pane 標題列）；border=true 補 1px 邊框（面板本身沒畫邊框時）。
+const withCorners = (el, r, bottom = true, border = false) => {
+  const t = cornerTheme(), w = 24;
+  return cornerDiv().relative().size_full().overflow_hidden().child(el)
+    .child(cornerDiv().absolute().top(-w).left(-w).right(-w).bottom(bottom ? -w : -400).border(w).border_color(t.canvas).rounded(r + w))
+    .when(border, (e) => e.child(cornerDiv().absolute().top(0).left(0).right(0).bottom(0).rounded(r).border_1().border_color(t.border)));
+};
+
 const BLOCK = "lyrics"; // layout 裡 panel-body 的子區塊 id
 const LINE_H = 36; // px：每句固定高度，過長的句子截斷（虛擬清單需要已知高度）
 const RETRY_MS = 15000; // 連不上伺服器時多久後再試
@@ -38,7 +50,7 @@ const http = async (target) => {
   return parseCurl(r.stdout);
 };
 
-export default class MalfoidLyrics extends View {
+class MalfoidLyrics extends View {
   init(_props, cx) {
     this.cache = new Map(); // 曲名＋演出者 → { kind, lyrics?, why?, at }：每首歌每次執行只查一次
     this.list = VirtualListScrollHandle.new();
@@ -116,10 +128,14 @@ export default class MalfoidLyrics extends View {
     else if (entry.kind === "down") content = this.message(t, "Cannot reach lyrics server", entry.why);
     else if (entry.lyrics.instrumental) content = this.message(t, "Instrumental");
     else content = this.body(t, entry.lyrics);
-    return v_flex().id("lyrics").size_full().min_h(0).bg(`${t.chrome}99`).text_color(t.foreground).text_size(13)
+    return v_flex().id("lyrics").size_full().min_h(0).rounded(14).overflow_hidden().bg(`${t.chrome}99`).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
       .child(h_flex().h(38).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
         .child(div().font_semibold().child("Lyrics"))
         .child(div().flex_1().min_w(0).truncate().text_size(12).text_color(t.dim).child(s ? `${s.title} · ${s.artist}` : "")))
       .child(content);
   }
+}
+
+export default class extends MalfoidLyrics {
+  render(cx) { return withCorners(super.render(cx), 14); }
 }

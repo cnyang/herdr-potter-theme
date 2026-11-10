@@ -9,11 +9,23 @@ import * as fs from "fs/promises";
 import { appHome, readTextFile, writeTextFile, theme } from "herdr";
 import { save } from "./lib.js";
 
+import { theme as cornerTheme } from "herdr";
+import { div as cornerDiv } from "gpui-kit";
+
+// 節點 background 的圖片不吃 radius，方角會露在圓角外；從外側用 canvas 色粗框蓋住四個角。
+// r = 開口半徑（卡片圓角）；bottom=false 只遮上緣（pane 標題列）；border=true 補 1px 邊框（面板本身沒畫邊框時）。
+const withCorners = (el, r, bottom = true, border = false) => {
+  const t = cornerTheme(), w = 24;
+  return cornerDiv().relative().size_full().overflow_hidden().child(el)
+    .child(cornerDiv().absolute().top(-w).left(-w).right(-w).bottom(bottom ? -w : -400).border(w).border_color(t.canvas).rounded(r + w))
+    .when(border, (e) => e.child(cornerDiv().absolute().top(0).left(0).right(0).bottom(0).rounded(r).border_1().border_color(t.border)));
+};
+
 const dir = () => `${appHome().replace(/\\/g, "/")}/data/theme-notes`;
 const file = () => `${dir()}/note.md`;
 const io = { read: () => readTextFile(file()), write: (text, expected) => writeTextFile(file(), text, expected) };
 
-export default class MalfoidNotes extends View {
+class MalfoidNotes extends View {
   init(_props, cx) {
     this.s = { text: "", disk: null };
     this.area = TextareaState.new({ placeholder: "Write markdown…" });
@@ -74,7 +86,7 @@ export default class MalfoidNotes extends View {
     } else {
       body = Textarea.new(this.area).flex_1().min_h(0).w_full().p(14).text_size(13).text_color(t.foreground);
     }
-    return v_flex().id("notes").size_full().min_h(0).bg(`${t.chrome}99`).text_color(t.foreground).text_size(13)
+    return v_flex().id("notes").size_full().min_h(0).rounded(14).overflow_hidden().bg(`${t.chrome}99`).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
       .child(h_flex().h(38).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
         .child(div().flex_1().font_semibold().child("Note"))
         .child(this.mode(t, "edit", "Edit", !this.preview, (_e, cx) => { this.preview = false; this.area.focus(); cx.notify(); }))
@@ -82,4 +94,8 @@ export default class MalfoidNotes extends View {
       .child(body)
       .when(Boolean(this.err && this.ready), (el) => el.child(div().flex_none().px(14).py(6).text_size(11).text_color(t.blocked).child(this.err)));
   }
+}
+
+export default class extends MalfoidNotes {
+  render(cx) { return withCorners(super.render(cx), 14); }
 }
