@@ -2,9 +2,10 @@
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import { spaces, agents, theme, run, window, keys, exec } from "herdr";
-import { SAMPLE_SH, parseSample, netRate, fmtRate } from "./lib.js";
+import { SAMPLE_SH, parseSample, netRate, fmtRate, TEAMS_PY, parseTeams } from "./lib.js";
 
 const SAMPLE_MS = 3000; // 取樣間隔；一次取樣約 1.7 秒（top 要抽兩次樣）
+const TEAMS_MS = 10000; // Zen 約 15 秒才寫一次 session store，抽得比這更密沒有意義
 
 export default class WorkspaceStatus extends View {
   init(_props, cx) {
@@ -13,6 +14,26 @@ export default class WorkspaceStatus extends View {
     this.busy = false;
     this.sample(cx);
     cx.timer.every(SAMPLE_MS, (cx) => this.sample(cx));
+    this.teams = null; // Teams 未讀數；沒有 Teams 分頁、Zen 沒開或取樣失敗就是 null，狀態列不顯示
+    this.teamsBusy = false;
+    this.sampleTeams(cx);
+    cx.timer.every(TEAMS_MS, (cx) => this.sampleTeams(cx));
+  }
+
+  // 瀏覽器在這台本機，所以不帶 on:（跟 sample() 不同，不跟著目前 space 的機器走）。
+  sampleTeams(cx) {
+    if (this.teamsBusy) return;
+    this.teamsBusy = true;
+    cx.spawn(async (cx) => {
+      try {
+        this.teams = parseTeams((await exec("python3", ["-I", "-c", TEAMS_PY], { timeout: 8000 })).stdout);
+      } catch {
+        this.teams = null; // 沒有 python3 等：寧可不顯示，也不要留著過期的數字
+      } finally {
+        this.teamsBusy = false;
+        cx.notify();
+      }
+    });
   }
 
   // 取樣的是目前 space 所在的機器，跟左邊的機器名稱一致；換機器後舊的累計值不能拿來算速率。
@@ -69,6 +90,10 @@ export default class WorkspaceStatus extends View {
       .child(h_flex().gap(6).items_center().child(div().size(6).rounded(3).bg(t.dim)).child(`${list.length} agents`)
         .when(needs > 0, el => el.child(div().text_color(t.blocked).child(`· ${needs} needs you`))))
       .when(Boolean(this.stats), el => el.child(this.usage(this.stats)))
+      // 有未讀：強調色底 + 粗體的小膠囊，一眼看得到；0 則維持一般灰字，不搶眼
+      .when(this.teams !== null, el => el.child(this.teams > 0
+        ? div().px(8).py(2).rounded(8).bg(t.accent).text_color(t.accent_foreground).font_bold().child(`Teams ${this.teams}`)
+        : div().child(`Teams ${this.teams}`)))
       .child(div().flex_1())
       .child(div().id("palette").text_color(t.dim).on_click(() => run("app.palette")).child(this.hint(t)));
   }

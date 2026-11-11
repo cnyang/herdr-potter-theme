@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { SAMPLE_SH, parseSample, netRate, fmtRate } from "../mods/malfoid-status/lib.js";
+import { SAMPLE_SH, parseSample, netRate, fmtRate, LZ4_PY, TEAMS_PY, parseTeams } from "../mods/malfoid-status/lib.js";
 
 test("parseSample reads 'cpu mem rx tx' and rejects anything else", () => {
   assert.deepEqual(parseSample("19 67 21686625831 42168474060\n"), { cpu: 19, mem: 67, rx: 21686625831, tx: 42168474060 });
@@ -43,4 +43,33 @@ test("sample script prints something parseSample accepts", { skip: process.platf
 test("sample script prints nothing off macOS, so the bar hides the stats", () => {
   const r = spawnSync("sh", ["-c", SAMPLE_SH.replace('"$(uname)"', '"Plan9"')], { encoding: "utf8" });
   assert.equal(parseSample(r.stdout), null);
+});
+
+test("parseTeams reads the '(N)' prefix of a Teams tab title", () => {
+  assert.equal(parseTeams("(1) 聊天 | 王小明 (您) | Microsoft Teams\n"), 1);
+  assert.equal(parseTeams("(12) Activity | Microsoft Teams"), 12);
+  // 有 Teams 分頁但沒有前綴 = 沒有未讀，是 0 不是 null
+  assert.equal(parseTeams("聊天 | 專案討論群 | Microsoft Teams"), 0);
+});
+
+test("parseTeams is null when there is no Teams tab, so the bar hides the badge", () => {
+  for (const none of ["", "\n", undefined, null, "(5) 收件匣 - Outlook"]) assert.equal(parseTeams(none), null, JSON.stringify(none));
+});
+
+test("parseTeams takes the largest count across several Teams tabs instead of summing", () => {
+  assert.equal(parseTeams("(2) A | Microsoft Teams\n(5) B | Microsoft Teams\nMicrosoft Teams"), 5);
+});
+
+// Python 內嵌的 LZ4 解碼器：literal 長度擴充、重疊 match（offset < length）都要對
+test("LZ4_PY decodes literal-only, extended-literal and overlapping-match blocks", { skip: process.platform !== "darwin" }, () => {
+  const dec = (hex) => spawnSync("python3", ["-I", "-c", `${LZ4_PY}\nimport sys\nsys.stdout.buffer.write(unlz4(bytes.fromhex(sys.argv[1])))`, hex], { encoding: "utf8" }).stdout;
+  assert.equal(dec("35616263030020" + "5859"), "abcabcabcabcXY");
+  assert.equal(dec("f005" + "61".repeat(20)), "a".repeat(20));
+});
+
+// 腳本與解析器的合約：只能印出含 Microsoft Teams 的標題行，其餘（其他分頁、cookie）一律不外洩
+test("TEAMS_PY exits cleanly and prints only Teams tab titles", { skip: process.platform !== "darwin" }, () => {
+  const r = spawnSync("python3", ["-I", "-c", TEAMS_PY], { encoding: "utf8", timeout: 15000 });
+  assert.equal(r.status, 0, r.stderr);
+  for (const line of r.stdout.split("\n").filter(Boolean)) assert.match(line, /Microsoft Teams/);
 });

@@ -35,3 +35,56 @@ export function fmtRate(b) {
   const kb = b / 1024;
   return Math.round(kb) < 1000 ? `${Math.round(kb)} KB/s` : `${(kb / 1024).toFixed(1)} MB/s`;
 }
+
+// ── Teams 未讀（網頁版，跑在 Zen 瀏覽器）─────────────────────────────────────────
+// 不碰網路、不存 token：Teams 網頁版有未讀時分頁標題會變成「(1) 聊天 | … | Microsoft Teams」，
+// 而 Zen（Firefox 系）每 ~15 秒把所有分頁標題寫進 session store（mozlz4 壓縮）。
+// 這裡只讀那個本機檔案、只印出含 Microsoft Teams 的標題；cookie、表單資料等其他欄位一律不碰。
+// String.raw：保留 \x00 讓 Python 自己解讀，不被 JS 先轉成 NUL 字元。
+export const LZ4_PY = String.raw`
+def unlz4(src):
+    # 標準 LZ4 block：token 高 4 bit = literal 長度，低 4 bit = match 長度 - 4，15 代表後面還有擴充位元組
+    dst, i = bytearray(), 0
+    while i < len(src):
+        tok = src[i]; i += 1
+        lit = tok >> 4
+        if lit == 15:
+            while True:
+                b = src[i]; i += 1; lit += b
+                if b != 255: break
+        dst += src[i:i + lit]; i += lit
+        if i >= len(src): break
+        off = src[i] | src[i + 1] << 8; i += 2
+        ml = tok & 15
+        if ml == 15:
+            while True:
+                b = src[i]; i += 1; ml += b
+                if b != 255: break
+        s = len(dst) - off
+        for k in range(ml + 4): dst.append(dst[s + k])  # 逐位元組複製：offset < 長度時是重疊 match，不能用切片
+    return bytes(dst)
+`;
+
+export const TEAMS_PY = String.raw`${LZ4_PY}
+import glob, json, os, subprocess, sys
+
+# Zen 沒在跑時 recovery.jsonlz4 是上次關閉前的舊檔，不能當現況
+if subprocess.run(["pgrep", "-x", "zen"], capture_output=True).returncode: sys.exit()
+pat = os.path.expanduser("~/Library/Application Support/zen/Profiles/*/sessionstore-backups/recovery.jsonlz4")
+for f in glob.glob(pat):
+    raw = open(f, "rb").read()
+    if raw[:8] != b"mozLz40\x00": continue  # 魔術字串 + 4 bytes 解壓後長度，之後才是 LZ4 block
+    for w in json.loads(unlz4(raw[12:])).get("windows", []):
+        for t in w.get("tabs", []):
+            es = t.get("entries") or []
+            if not es: continue
+            title = es[min(t.get("index", 1), len(es)) - 1].get("title", "")  # index 是 1 起算的目前歷史位置
+            if "Microsoft Teams" in title: print(title.replace("\n", " "))
+`;
+
+// 標題行 → 未讀數。沒有 Teams 分頁 = null（狀態列不顯示）；有分頁但沒前綴 = 0；多個分頁取最大，不加總以免重複計算。
+export function parseTeams(out) {
+  const titles = String(out ?? "").split("\n").filter((l) => l.includes("Microsoft Teams"));
+  if (!titles.length) return null;
+  return Math.max(...titles.map((l) => Number(/^\((\d+)/.exec(l)?.[1] ?? 0)));
+}
