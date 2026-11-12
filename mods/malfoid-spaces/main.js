@@ -21,6 +21,10 @@ const withCorners = (el, r, bottom = true, border = false) => {
     .when(border, (e) => e.child(cornerDiv().absolute().top(0).left(0).right(0).bottom(0).rounded(r).border_1().border_color(t.border)));
 };
 
+// 選中 space 整圈 3px 框線（同 agents 的 focusRing）：absolute 疊層往外 1px 蓋住原本 1px 框，排版不跳動。
+// 必須是最後一個 child 才會畫在內容上面。
+const focusRing = (color, r) => div().absolute().top(-1).left(-1).right(-1).bottom(-1).border(3).border_color(color).rounded(r);
+
 function find(node, id) {
   if (node?.id === id) return node;
   for (const child of node?.children ?? []) {
@@ -346,7 +350,7 @@ class Spaces extends View {
       .h(rowHeight({ tree }))
       .flex_none()
       .justify_center()
-      .when(on, (el) => el.bg(`${t.surface}c8`).border(1).border_color(t.accent))
+      .when(on, (el) => el.bg(t.selected).border(1).border_color(t.accent))
       .when(!on, (el) => el.hover((s) => s.bg(t.hover)))
       .when(this.pressed === i && this.over !== i, (el) => el.opacity(0.5))
       .when(this.pressed !== null && this.over === i && this.pressed !== i, (el) => el.child(
@@ -384,10 +388,11 @@ class Spaces extends View {
           .when(!tree, el => el.child(image(crest).size(48).flex_none()))
           .child(v_flex().flex_1().min_w(0).gap(1)
             .child(h_flex().gap(9).items_center()
-              .child(div().flex_shrink(0).max_w(150).truncate().text_color(t.foreground).child(w.name))
+              .child(div().flex_shrink(0).max_w(150).truncate().text_color(on ? t.accent : t.foreground).child(w.name))
               .child(g ? this.gitTail(g, tree, w.name, t) : div().flex_1()))
             .when(!tree, el => el.children(this.gitLines(sum, t)))),
-      );
+      )
+      .when(on, (el) => el.child(focusRing(t.accent, 9)));
   }
 
   compact({ w, i }, t) {
@@ -397,11 +402,14 @@ class Spaces extends View {
       .flex_none()
       .justify_center()
       .gap(4)
-      .when(w.active, (el) => el.bg(t.raised))
+      .relative()
+      .rounded(6)
+      .when(w.active, (el) => el.bg(t.selected).border(1).border_color(t.accent))
       .hover((s) => s.bg(t.hover))
       .on_click(() => run("space.select", { id: w.id }))
-      .child(div().text_color(w.active ? t.foreground : t.muted).child(String(i + 1)))
-      .child(div().text_color(tone(t, w.status)).child(glyph(w.status)));
+      .child(div().text_color(w.active ? t.accent : t.muted).child(String(i + 1)))
+      .child(div().text_color(tone(t, w.status)).child(glyph(w.status)))
+      .when(w.active, (el) => el.child(focusRing(t.accent, 6)));
   }
 
   render() {

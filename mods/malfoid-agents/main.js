@@ -25,6 +25,10 @@ function toggleSidebar() {
   run("layout.resize", { id: "sidebar", px: nextSidebarWidth(px, window()?.platform) });
 }
 
+// 選中卡片整圈 3px 框線：absolute 疊層往外 1px 蓋住原本 1px 框，不改 border 寬度所以卡片排版不跳動。
+// 顏色沿用 frameColor（blocked 仍是金框）；必須是最後一個 child 才會畫在內容上面。
+const focusRing = (color, r) => div().absolute().top(-1).left(-1).right(-1).bottom(-1).border(3).border_color(color).rounded(r);
+
 function programIcon(p, t) {
   return iconKind(p) === "svg"
     ? svg(p.icon).size(14).flex_none().text_color(t.foreground)
@@ -44,9 +48,10 @@ class Malfoid extends View {
     const frame = frameColor(state, a.focused, t, collapsed);
     if (collapsed) {
       return div().id(`malfoid-${a.address}`).p(4).rounded(8).border(1)
-        .border_color(frame).cursor_pointer()
+        .border_color(frame).cursor_pointer().relative().when(a.focused, el => el.bg(t.selected))
         .on_click(() => run("agent.focus", { terminal: a.address }))
-        .child(image("mods/malfoid-agents/art/portrait.png").size(42).rounded(6));
+        .child(image("mods/malfoid-agents/art/portrait.png").size(42).rounded(6))
+        .when(a.focused, el => el.child(focusRing(frame, 8)));
     }
     const statusColor = t[state];
     return h_flex()
@@ -56,12 +61,14 @@ class Malfoid extends View {
       .p(6)
       .gap(8)
       .items_center()
-      .bg(`${t.surface}c8`)
+      // 選中：框線 border→accent 同是綠色系不夠明顯，再加 accent 淡底（t.selected）＋名稱 accent 色
+      .bg(a.focused ? t.selected : `${t.surface}c8`)
       .border(1)
       .border_color(frame).rounded(10)
       .cursor_pointer()
       .hover((s) => s.bg(t.hover))
       .on_click(() => run("agent.focus", { terminal: a.address }))
+      .relative()
       .child(image(spritePath(state, now)).w(72).h(96).flex_none())
       .child(
         v_flex()
@@ -74,7 +81,7 @@ class Malfoid extends View {
               .min_w(0)
               .gap(8)
               .items_center()
-              .child(div().flex_1().min_w(0).truncate().font_semibold().child(a.tab_name || a.address)),
+              .child(div().flex_1().min_w(0).truncate().font_semibold().when(a.focused, el => el.text_color(t.accent)).child(a.tab_name || a.address)),
           )
           .child(h_flex().gap(6).items_center()
             .child(div().size(6).rounded_full().bg(statusColor)
@@ -83,7 +90,8 @@ class Malfoid extends View {
           .child(h_flex().w_full().min_w(0).gap(4).items_center()
             .when(Boolean(iconKind(a.program)), el => el.child(programIcon(a.program, t)))
             .child(div().flex_1().min_w(0).text_size(10).text_color(t.dim).truncate().child(a.program?.name || "Agent"))),
-      );
+      )
+      .when(a.focused, el => el.child(focusRing(frame, 10)));
   }
 
   render() {
