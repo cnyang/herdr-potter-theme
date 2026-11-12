@@ -2,10 +2,11 @@
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import { spaces, agents, theme, run, window, keys, exec } from "herdr";
-import { SAMPLE_SH, parseSample, netRate, fmtRate, TEAMS_PY, parseTeams } from "./lib.js";
+import { SAMPLE_SH, parseSample, netRate, fmtRate, TEAMS_PY, parseTeams, DISCORD_AS, parseDiscord } from "./lib.js";
 
 const SAMPLE_MS = 3000; // 取樣間隔；一次取樣約 1.7 秒（top 要抽兩次樣）
 const TEAMS_MS = 10000; // Zen 約 15 秒才寫一次 session store，抽得比這更密沒有意義
+const DISCORD_MS = 5000; // Discord 是即時問 Chrome，不受 session store 延遲限制
 
 export default class WorkspaceStatus extends View {
   init(_props, cx) {
@@ -18,6 +19,26 @@ export default class WorkspaceStatus extends View {
     this.teamsBusy = false;
     this.sampleTeams(cx);
     cx.timer.every(TEAMS_MS, (cx) => this.sampleTeams(cx));
+    this.discord = null; // { mentions, unread }；沒有 Discord 分頁、Chrome 沒開、自動化權限被拒就是 null，狀態列不顯示
+    this.discordBusy = false;
+    this.sampleDiscord(cx);
+    cx.timer.every(DISCORD_MS, (cx) => this.sampleDiscord(cx));
+  }
+
+  // 同 sampleTeams：Chrome 在這台本機，不帶 on:。
+  sampleDiscord(cx) {
+    if (this.discordBusy) return;
+    this.discordBusy = true;
+    cx.spawn(async (cx) => {
+      try {
+        this.discord = parseDiscord((await exec("osascript", ["-e", DISCORD_AS], { timeout: 8000 })).stdout);
+      } catch {
+        this.discord = null; // 權限被拒、沒裝 Chrome：寧可不顯示
+      } finally {
+        this.discordBusy = false;
+        cx.notify();
+      }
+    });
   }
 
   // 瀏覽器在這台本機，所以不帶 on:（跟 sample() 不同，不跟著目前 space 的機器走）。
@@ -94,6 +115,10 @@ export default class WorkspaceStatus extends View {
       .when(this.teams !== null, el => el.child(this.teams > 0
         ? div().px(8).py(2).rounded(8).bg(t.accent).text_color(t.accent_foreground).font_bold().child(`Teams ${this.teams}`)
         : div().child(`Teams ${this.teams}`)))
+      // 提及/私訊：同 Teams 的強調色膠囊；只有未讀小點：強調色字，不用底色；已讀：灰字
+      .when(this.discord !== null, el => el.child(this.discord.mentions > 0
+        ? div().px(8).py(2).rounded(8).bg(t.accent).text_color(t.accent_foreground).font_bold().child(`Discord ${this.discord.mentions}`)
+        : this.discord.unread ? div().text_color(t.accent).child("Discord •") : div().child("Discord")))
       .child(div().flex_1())
       .child(div().id("palette").text_color(t.dim).on_click(() => run("app.palette")).child(this.hint(t)));
   }

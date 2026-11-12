@@ -88,3 +88,34 @@ export function parseTeams(out) {
   if (!titles.length) return null;
   return Math.max(...titles.map((l) => Number(/^\((\d+)/.exec(l)?.[1] ?? 0)));
 }
+
+// ── Discord 未讀（網頁版，跑在 Chrome）──────────────────────────────────────────
+// Chrome 的設定檔資料夾被 macOS 擋住讀不到，所以改用 AppleScript 即時問 Chrome 分頁標題。
+// 第一次執行時 macOS 會請使用者允許 herdr 控制 Chrome（自動化權限）；拒絕就只是不顯示。
+// 先判斷 is running：不然 tell 會把沒開的 Chrome 叫起來。只回傳含 Discord 的標題，其他分頁不外洩。
+export const DISCORD_AS = `set out to ""
+if application "Google Chrome" is running then
+	tell application "Google Chrome"
+		repeat with w in windows
+			repeat with t in tabs of w
+				set n to title of t
+				if n contains "Discord" then set out to out & n & linefeed
+			end repeat
+		end repeat
+	end tell
+end if
+return out`;
+
+// Discord 標題：「(3) Discord | …」= 3 則提及/私訊；「• Discord | …」= 有未讀但沒提及；「Discord | …」= 已讀。
+// 要求 Discord 在標題開頭（前綴之後），排除「… | Discord 開發人員入口網站」這類分頁。
+// 回傳 null（沒有 Discord 分頁，不顯示）或 { mentions, unread }；多個分頁時提及取最大、未讀任一即算。
+export function parseDiscord(out) {
+  const tabs = String(out ?? "").split("\n")
+    .map((l) => /^(?:\((\d+)\) |(•) )?Discord(?: \||$)/.exec(l.trim()))
+    .filter(Boolean);
+  if (!tabs.length) return null;
+  return {
+    mentions: Math.max(...tabs.map((m) => Number(m[1] ?? 0))),
+    unread: tabs.some((m) => m[1] || m[2]),
+  };
+}

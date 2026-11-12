@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { SAMPLE_SH, parseSample, netRate, fmtRate, LZ4_PY, TEAMS_PY, parseTeams } from "../mods/malfoid-status/lib.js";
+import { SAMPLE_SH, parseSample, netRate, fmtRate, LZ4_PY, TEAMS_PY, parseTeams, DISCORD_AS, parseDiscord } from "../mods/malfoid-status/lib.js";
 
 test("parseSample reads 'cpu mem rx tx' and rejects anything else", () => {
   assert.deepEqual(parseSample("19 67 21686625831 42168474060\n"), { cpu: 19, mem: 67, rx: 21686625831, tx: 42168474060 });
@@ -72,4 +72,26 @@ test("TEAMS_PY exits cleanly and prints only Teams tab titles", { skip: process.
   const r = spawnSync("python3", ["-I", "-c", TEAMS_PY], { encoding: "utf8", timeout: 15000 });
   assert.equal(r.status, 0, r.stderr);
   for (const line of r.stdout.split("\n").filter(Boolean)) assert.match(line, /Microsoft Teams/);
+});
+
+test("parseDiscord reads mentions '(N)' and the unread dot '•'", () => {
+  assert.deepEqual(parseDiscord("(3) Discord | #general | My Server\n"), { mentions: 3, unread: true });
+  assert.deepEqual(parseDiscord("• Discord | #random | My Server"), { mentions: 0, unread: true });
+  assert.deepEqual(parseDiscord("Discord | #general | My Server"), { mentions: 0, unread: false });
+  assert.deepEqual(parseDiscord("Discord"), { mentions: 0, unread: false });
+});
+
+test("parseDiscord is null without a Discord tab and ignores other Discord-named pages", () => {
+  for (const none of ["", "\n", undefined, null, "我的應用程式 | Discord 開發人員入口網站", "Discordia | wiki"]) assert.equal(parseDiscord(none), null, JSON.stringify(none));
+});
+
+test("parseDiscord takes the largest mention count and ORs the unread dot across tabs", () => {
+  assert.deepEqual(parseDiscord("(2) Discord | a\n• Discord | b\n(5) Discord | c"), { mentions: 5, unread: true });
+  assert.deepEqual(parseDiscord("Discord | a\n• Discord | b"), { mentions: 0, unread: true });
+});
+
+// 腳本合約：語法要能編譯（不實際執行，免得在 CI 觸發自動化權限視窗或叫起 Chrome）
+test("DISCORD_AS compiles", { skip: process.platform !== "darwin" }, () => {
+  const r = spawnSync("osacompile", ["-o", "/dev/null", "-e", DISCORD_AS], { encoding: "utf8" });
+  assert.equal(r.status, 0, r.stderr);
 });
