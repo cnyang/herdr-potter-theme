@@ -84,8 +84,10 @@ export default class Tabs extends View {
     const item = (c, i) => {
       const program = allPanes.find(p => p.tab === c.id && p.program?.agent)?.program ?? allPanes.find(p => p.tab === c.id)?.program;
       const name = /^tb\d+$/.test(c.name) ? program?.name ?? "Terminal" : c.name;
-      return h_flex().id(`tab-${c.id}`).h(42).rounded(9).px(11).gap(8).items_center().flex_none().text_size(13.5)
-        .border(1).border_color(c.status === "blocked" ? t.blocked : c.active ? t.accent : t.border).bg(c.active ? t.raised : t.surface).text_color(c.active ? t.foreground : t.muted)
+      // 選中分頁整圈 3px 框線（同 agents/spaces 的 focusRing），blocked 仍用 blocked 色；必須是最後一個 child
+      const ring = c.status === "blocked" ? t.blocked : t.accent;
+      return h_flex().id(`tab-${c.id}`).relative().h(42).rounded(9).px(11).gap(8).items_center().flex_none().text_size(13.5)
+        .border(1).border_color(c.status === "blocked" ? t.blocked : c.active ? t.accent : t.border).bg(c.active ? t.selected : t.surface).text_color(c.active ? t.accent : t.muted)
         .hover(s => s.bg(t.hover))
         .on_mouse_down("left", (e, cx) => { cx.stop_propagation(); this.pressed = i; if (e.click_count === 2) run("tab.rename", { id: c.id }); })
         .on_mouse_up("left", () => {
@@ -98,7 +100,8 @@ export default class Tabs extends View {
         .child(div().max_w(170).truncate().child(c.zoomed ? `${name} Z` : name))
         .when(c.status === "working", el => el.child(svg("mods/workspace-chrome/spinner.svg").size(12).flex_none().text_color(t.working).spin(900)))
         .when(c.status === "blocked" || c.status === "done", el => el.child(div().size(6).rounded(3).bg(t[c.status])))
-        .when(c.active, el => el.child(div().id(`close-${c.id}`).text_color(t.dim).on_mouse_down("left", stop).on_click((_e, cx) => { cx.stop_propagation(); run("tab.close", { id: c.id }); }).child(svg("mods/pane/close.svg").size(12))));
+        .when(c.active, el => el.child(div().id(`close-${c.id}`).text_color(t.dim).on_mouse_down("left", stop).on_click((_e, cx) => { cx.stop_propagation(); run("tab.close", { id: c.id }); }).child(svg("mods/pane/close.svg").size(12))))
+        .when(c.active, el => el.child(div().absolute().top(-1).left(-1).right(-1).bottom(-1).border(3).border_color(ring).rounded(9)));
     };
     const root = layout(), sidebar = find(root, "sidebar"), w = window();
     // Old saved rails and a dragged-narrow sidebar can be smaller than the window buttons.
@@ -111,13 +114,15 @@ export default class Tabs extends View {
     // 工具列專用 24px 粗線圖示，用 image() 保留金色。
     const panelButton = (id, label, icon) => {
       const on = panel && !panel.hidden && body?.active === id;
-      return h_flex().id(`panel-${id}`).h(36).px(12).gap(6).flex_none().items_center()
-        .text_size(13).rounded(8).border(1).border_color(on ? t.accent : t.border).bg(on ? t.selected : t.surface).text_color(on ? t.foreground : t.muted)
+      return h_flex().id(`panel-${id}`).relative().h(36).px(12).gap(6).flex_none().items_center()
+        .text_size(13).rounded(8).border(1).border_color(on ? t.accent : t.border).bg(on ? t.selected : t.surface).text_color(on ? t.accent : t.muted)
         .hover(s => s.bg(t.hover)).on_mouse_down("left", stop)
         .on_click(() => {
           if (on) run("layout.hide", { id: "panel" });
           else { run("layout.select", { stack: "panel-body", child: id }); run("layout.show", { id: "panel" }); }
-        }).child(image(icon).size(24).flex_none()).child(label);
+        }).child(image(icon).size(24).flex_none()).child(label)
+        // 開啟中的面板按鈕：同分頁的整圈 3px 框線，必須是最後一個 child
+        .when(on, el => el.child(div().absolute().top(-1).left(-1).right(-1).bottom(-1).border(3).border_color(t.accent).rounded(8)));
     };
     return h_flex().size_full().min_w(0).px(10).pl(lightsPadding).gap(3).items_center()
       .on_mouse_up("left", () => { this.pressed = null; })
