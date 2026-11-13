@@ -1,7 +1,7 @@
 // 修改自 Traveler：魔法學院頭像、青綠焦點框與金色等待提示。
 import { View, div, svg, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { spaces, panes, run, openOverlay, theme, window, shared, layout, settings } from "herdr";
+import { spaces, run, openOverlay, theme, window, shared, layout, settings } from "herdr";
 import { assignPortraits } from "./portraits.js";
 import { ROTATE_MS, nextImage } from "./background.js";
 // localStorage 內容可能損毀；壞資料退回預設，不讓模組初始化失敗。
@@ -80,10 +80,9 @@ export default class Tabs extends View {
     const button = (id, label, action, pill) => div().id(id).size(pill ? 36 : 26).flex_none().flex().items_center().justify_center().text_color(t.dim)
       .when(pill, el => el.rounded(8).text_size(18).bg(t.surface).border(1).border_color(t.border)).hover(s => s.bg(t.hover).text_color(t.foreground))
       .on_mouse_down("left", stop).on_click(action).child(label);
-    const allPanes = panes(); // 每次讀取都會複製全部 pane，整個 render 只讀一次。
     const item = (c, i) => {
-      const program = allPanes.find(p => p.tab === c.id && p.program?.agent)?.program ?? allPanes.find(p => p.tab === c.id)?.program;
-      const name = /^tb\d+$/.test(c.name) ? program?.name ?? "Terminal" : c.name;
+      // 沒命名的分頁，Herdr 以位置數字命名（舊版為 tbN）；一律顯示 temp。
+      const name = /^(tb)?\d+$/.test(c.name) ? "temp" : c.name;
       // 選中分頁整圈 3px 框線（同 agents/spaces 的 focusRing），blocked 仍用 blocked 色；必須是最後一個 child
       const ring = c.status === "blocked" ? t.blocked : t.accent;
       return h_flex().id(`tab-${c.id}`).relative().h(42).rounded(9).px(11).gap(8).items_center().flex_none().text_size(13.5)
