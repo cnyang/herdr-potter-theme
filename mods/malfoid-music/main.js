@@ -1,29 +1,17 @@
 // 修改自 herdr-mods/yt-music（MIT，見 LICENSE-yt-music.txt）：改為控制本機 Apple Music，
-// 放在 Malfoid 側欄底部：曲名、時間，以及上一首、倒退 10 秒、播放／暫停、快轉 10 秒、下一首。
+// 放在 Malfoid 底部狀態列的右側：曲名、時間，以及上一首、倒退 10 秒、播放／暫停、快轉 10 秒、下一首。
 //
 // 全 app 只有一條連線。daemon.js 是唯一與 Music 通話的程序：以 herdr-core 終端 apm-<daemon.js 雜湊>
 // 長駐（同名只能有一個活的，所以重載或第二份 mod 會沿用它）。曲目、播放狀態或位置跳動時它寫
 // data/malfoid-music/state.json；本 mod 監看該資料夾（不輪詢），並以 data/malfoid-music/cmd.json 下指令。
 // 第一次使用時 macOS 會詢問是否允許控制 Music（系統設定 > 隱私權與安全性 > 自動化）。
 //
-// 沒歌時區塊縮到 0 px，有歌時長回來；layout 裡的區塊 id 必須是 BLOCK。
+// 沒歌時區塊寬度縮到 0 px，有歌時長回來；layout 裡的區塊 id 必須是 BLOCK。底色、圓角、邊框由外層 status 節點負責。
 import { View, div, svg } from "gpui-kit";
-import { h_flex, v_flex } from "gpui-base";
+import { h_flex } from "gpui-base";
 import * as fs from "fs/promises";
 import { hc, appHome, readTextFile, watchFolder, theme, run, layout } from "herdr";
-import { SEEK_SECONDS, blockHeight, clock, hash, position } from "./lib.js";
-
-import { theme as cornerTheme } from "herdr";
-import { div as cornerDiv } from "gpui-kit";
-
-// 節點 background 的圖片不吃 radius，方角會露在圓角外；從外側用 canvas 色粗框蓋住四個角。
-// r = 開口半徑（卡片圓角）；bottom=false 只遮上緣（pane 標題列）；border=true 補 1px 邊框（面板本身沒畫邊框時）。
-const withCorners = (el, r, bottom = true, border = false) => {
-  const t = cornerTheme(), w = 24;
-  return cornerDiv().relative().size_full().overflow_hidden().child(el)
-    .child(cornerDiv().absolute().top(-w).left(-w).right(-w).bottom(bottom ? -w : -400).border(w).border_color(t.canvas).rounded(r + w))
-    .when(border, (e) => e.child(cornerDiv().absolute().top(0).left(0).right(0).bottom(0).rounded(r).border_1().border_color(t.border)));
-};
+import { SEEK_SECONDS, blockWidth, clock, hash, position } from "./lib.js";
 
 const NAME = "malfoid-music";
 const BLOCK = "music";
@@ -49,14 +37,11 @@ function find(node, id) {
   return null;
 }
 
-// 側欄收成窄條（< 160 px）時五顆按鈕放不下：與 malfoid-chrome 一樣以寬度判斷，不看旗標。
-const narrow = () => (find(layout(), "sidebar")?.size?.px ?? Infinity) < 160;
-
-class MalfoidMusic extends View {
+export default class MalfoidMusic extends View {
   init(_props, cx) {
     this.state = null; // { title, artist, paused, seconds, duration, at } 或 { error } 或 null
-    // 兩次寫入之間由本 mod 自己推進時鐘，只有播放中才重畫；順便讓區塊跟上側欄寬度變化。
-    cx.timer.every(1000, (cx) => { this.fit(); if (this.state?.title && !this.state.paused) cx.notify(); });
+    // 兩次寫入之間由本 mod 自己推進時鐘，只有播放中才重畫。
+    cx.timer.every(1000, (cx) => { if (this.state?.title && !this.state.paused) cx.notify(); });
     // 資料夾事件漏掉時不能讓舊曲目一直掛著：播放中每 5 秒重讀一次，時鐘超過曲長也立刻重讀。
     this.ticks = 0;
     cx.timer.every(1000, (cx) => {
@@ -101,7 +86,7 @@ class MalfoidMusic extends View {
     cx.notify();
   }
 
-  fit() { this.showBlock(blockHeight(this.state, narrow())); }
+  fit() { this.showBlock(blockWidth(this.state)); }
 
   act(action, cx) {
     // 先在畫面上反應，daemon 下一次寫入會校正。
@@ -120,9 +105,6 @@ class MalfoidMusic extends View {
     if (!node) return;
     if (node.hidden) run("layout.show", { id: BLOCK });
     if (node.size?.px !== px) run("layout.resize", { id: BLOCK, px });
-    // 卡片前的 12px 空隙跟著顯示／收起：側欄 gap 為 0，空隙由 music-gap 節點負責，閒置時不留白。
-    const gap = find(layout(), "music-gap"), want = px > 0 ? 12 : 0;
-    if (gap && gap.size?.px !== want) run("layout.resize", { id: "music-gap", px: want });
   }
 
   async daemonLive() {
@@ -139,16 +121,16 @@ class MalfoidMusic extends View {
 
   render() {
     const t = theme(), s = this.state;
-    // 底色與側欄其他區塊相同（chrome + alpha），讓側欄底圖透出。
-    const box = v_flex().id(NAME).size_full().px(12).justify_center().gap(6).overflow_hidden()
-      .rounded(14).bg(`${t.chrome}c8`).border_1().border_color(t.border).text_size(12).text_color(t.muted);
     if (!s) return div().size_full();
+    // 只排內容：底色由 status 節點畫；左邊 1px 線與狀態列左半隔開。
+    const box = h_flex().id(NAME).size_full().px(10).gap(8).items_center().overflow_hidden()
+      .border_l_1().border_color(t.border).text_size(12).text_color(t.muted);
     if (s.error === "denied") {
-      return box.child(h_flex().gap(8).items_center()
+      return box
         .child(svg(ICON("music")).size(12).flex_none().text_color(t.dim))
         .child(div().flex_1().min_w(0).truncate().text_size(11.5).text_color(t.dim)
           .tooltip("System Settings > Privacy & Security > Automation: allow Music")
-          .child("Music: allow Automation access")));
+          .child("Music: allow Automation access"));
     }
     const button = (id, icon, tip) => {
       const main = id === "toggle";
@@ -161,26 +143,15 @@ class MalfoidMusic extends View {
         .on_click((_e, cx) => this.act(id, cx))
         .child(svg(ICON(icon)).size(12));
     };
-    const seconds = position(s, Date.now());
-    const pct = s.duration > 0 ? Math.min(1, seconds / s.duration) : 0;
     return box
-      // 1: 曲目
-      .child(h_flex().gap(7).items_center().tooltip(`${s.title} · ${s.artist}`)
-        .child(svg(ICON("music")).size(12).flex_none().text_color(s.paused ? t.dim : t.accent))
+      .child(svg(ICON("music")).size(12).flex_none().text_color(s.paused ? t.dim : t.accent))
+      // 曲目：吃掉剩下的寬度，放不下就截斷（完整曲名在 tooltip）
+      .child(h_flex().flex_1().min_w(0).gap(6).items_center().tooltip(`${s.title} · ${s.artist}`)
         .child(div().flex_shrink(1).min_w(0).truncate().text_color(s.paused ? t.muted : t.foreground).font_medium().child(s.title))
         .child(div().flex_shrink(2).min_w(0).truncate().text_color(t.dim).child(s.artist)))
-      // 2: 進度
-      .child(h_flex().gap(8).items_center().text_size(11)
-        .child(div().w(34).flex_none().text_color(t.dim).child(clock(seconds)))
-        // 進度條吃掉兩個時間框剩下的寬度；填色用百分比。不要用 on_size_change 的寬度手算：實測它含 Herdr zoom（1.2 倍），會把右邊的總長擠出區塊。
-        .child(div().flex_1().min_w(40).h(4).rounded(2).bg(t.raised).child(div().h_full().rounded(2).w(`${pct * 100}%`).bg(s.paused ? t.dim : t.accent)))
-        .child(div().w(34).flex_none().text_right().text_color(t.dim).child(clock(s.duration))))
-      // 3: 控制鈕
-      .child(h_flex().gap(6).items_center().justify_center().children(CONTROLS.map(([id, icon, tip]) =>
+      // 時間：固定最小寬度，數字位數變動時按鈕不抖動
+      .child(div().min_w(66).flex_none().text_size(11).text_right().text_color(t.dim).child(`${clock(position(s, Date.now()))} / ${clock(s.duration)}`))
+      .child(h_flex().gap(4).items_center().children(CONTROLS.map(([id, icon, tip]) =>
         id === "toggle" ? button(id, s.paused ? "play" : "pause", s.paused ? "Play" : "Pause") : button(id, icon, tip))));
   }
-}
-
-export default class extends MalfoidMusic {
-  render(cx) { return withCorners(super.render(cx), 14); }
 }

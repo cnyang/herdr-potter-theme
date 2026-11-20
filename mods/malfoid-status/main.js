@@ -1,4 +1,5 @@
-// 修改自 Herdr 內建 workspace-status：圓角 13px、移除上緣分隔線，成為底部的浮動卡片。
+// 修改自 Herdr 內建 workspace-status：移除上緣分隔線，成為底部的浮動卡片。
+// 底色、圓角、邊框由 layout 的 status 節點畫（右側同一張卡片還有 malfoid-music），這裡只排內容。
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import { spaces, agents, theme, run, window, keys, exec } from "herdr";
@@ -105,7 +106,7 @@ export default class WorkspaceStatus extends View {
     const list = agents();
     const needs = list.filter(a => a.status === "blocked").length;
     const label = (icon, text) => h_flex().gap(6).items_center().child(svg(`mods/workspace-chrome/${icon}.svg`).size(13)).child(text);
-    return h_flex().size_full().px(14).gap(16).items_center().rounded(13).overflow_hidden().bg(t.chrome).text_size(11.8).text_color(t.muted)
+    return h_flex().size_full().px(14).gap(16).items_center().overflow_hidden().text_size(11.8).text_color(t.muted)
       .child(label(space?.machine ? "server" : "monitor", space?.machine ?? "This computer"))
       .when(Boolean(space?.branch), el => el.child(label("branch", space.branch)))
       .child(h_flex().gap(6).items_center().child(div().size(6).rounded(3).bg(t.dim)).child(`${list.length} agents`)

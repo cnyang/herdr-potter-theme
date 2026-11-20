@@ -8,7 +8,7 @@ import { spawnSync } from "node:child_process";
 import { STATES, stateFor, spritePath, nextSidebarWidth, frameColor, iconKind, iconSrc, statusText, phaseOffset, ACTION_MS, SIDEBAR_WIDTH } from "../mods/malfoid-agents/lib.js";
 import { PORTRAITS, assignPortraits } from "../mods/malfoid-tabs/portraits.js";
 import { housePath } from "../mods/malfoid-spaces/houses.js";
-import { clock, hash, position, blockHeight } from "../mods/malfoid-music/lib.js";
+import { clock, hash, position, blockWidth } from "../mods/malfoid-music/lib.js";
 import { BACKGROUNDS, nextImage } from "../mods/malfoid-tabs/background.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -299,12 +299,10 @@ test("music clock reads m:ss and the position never runs past the track", () => 
   assert.equal(position({ ...s, duration: 0 }, 60000), 160, "a stream (duration 0) has no cap");
 });
 
-test("music block takes no room without a track, on the narrow rail, and is shorter for the permission hint", () => {
-  assert.equal(blockHeight(null, false), 0);
-  assert.equal(blockHeight({ title: "a" }, true), 0);
-  assert.equal(blockHeight({ error: "denied" }, true), 0);
-  assert.equal(blockHeight({ error: "denied" }, false), 36);
-  assert.equal(blockHeight({ title: "a" }, false), 92);
+test("music block takes no room without a track and is narrower for the permission hint", () => {
+  assert.equal(blockWidth(null), 0);
+  assert.equal(blockWidth({ error: "denied" }), 220);
+  assert.equal(blockWidth({ title: "a" }), 460);
 });
 
 test("music daemon name hash is FNV-1a so an edited daemon.js gets a new terminal name", () => {
@@ -313,19 +311,20 @@ test("music daemon name hash is FNV-1a so an edited daemon.js gets a new termina
   assert.notEqual(hash("daemon v1"), hash("daemon v2"));
 });
 
-test("music mod is its own floating card below the lists, ships its icons and keeps the crash guards", () => {
-  // 浮動卡片版：側欄 gap 為 0，卡片間的 12px 由空節點負責；music-gap 跟著 music 高度 0↔12，閒置時不會多出空隙。
-  const sidebar = json("layouts/malfoid.json").children.find(n => n.id === "sidebar");
-  assert.equal(sidebar.gap, 0);
-  assert.deepEqual(sidebar.children.map(n => n.id).slice(-4), ["music-gap", "music", "gap-footer", "sidebar-footer"]);
-  const gap = sidebar.children.find(n => n.id === "music-gap");
-  assert.deepEqual([gap.size.px, gap.min], [0, 0]);
-  const block = sidebar.children.find(n => n.id === "music");
+test("music mod lives inside the status bar, ships its icons and keeps the crash guards", () => {
+  // 狀態列版：status 是一整張卡片（底色、圓角、邊框都在這個 row 節點），左半是 status mod、右半是 music mod；沒歌時 music 寬 0。
+  const layout = json("layouts/malfoid.json");
+  const sidebar = layout.children.find(n => n.id === "sidebar");
+  assert.deepEqual(sidebar.children.map(n => n.id), ["brand", "gap-brand", "sidebar-lists", "gap-footer", "sidebar-footer"]);
+  const bar = layout.children.find(n => n.id === "work").children.find(n => n.id === "status");
+  assert.equal(bar.type, "row");
+  assert.deepEqual(bar.children.map(n => n.id), ["status-main", "music"]);
+  assert.equal(bar.children[0].content.mod, "malfoid-status");
+  const block = bar.children[1];
   assert.equal(block.content.mod, "malfoid-music");
   assert.deepEqual([block.size.px, block.min], [0, 0]);
   const main = readFileSync(join(root, "mods/malfoid-music/main.js"), "utf8");
   assert.ok(main.includes('const BLOCK = "music"'), "mod must resize the layout block with this id");
-  assert.ok(main.includes('"music-gap"'), "mod must resize the gap node together with the block");
   for (const icon of ["music", "skip-back", "rewind", "play", "pause", "fast-forward", "skip-forward"]) {
     assert.ok(existsSync(join(root, `mods/malfoid-music/${icon}.svg`)), icon);
     assert.ok(main.includes(`"${icon}"`), `${icon} unused`);

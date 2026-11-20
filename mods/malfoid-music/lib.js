@@ -17,5 +17,5 @@ export function hash(s) {
 // 上次寫入的位置 + 經過的時間；暫停不動，不超過總長（直播 duration 為 0 則不設上限）。
 export const position = (s, now) => (s.paused ? s.seconds : Math.min(s.duration || Infinity, s.seconds + (now - s.at) / 1000));
 
-// 區塊高度：沒歌 0、授權提示 36、播放中 92；側欄收成窄條時一律 0（塞不下五顆按鈕）。
-export const blockHeight = (state, narrow) => (!state || narrow ? 0 : state.error ? 36 : 92);
+// 區塊寬度（狀態列右側）：沒歌 0、授權提示 220、播放中 460。
+export const blockWidth = (state) => (!state ? 0 : state.error ? 220 : 460);

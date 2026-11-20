@@ -86,31 +86,6 @@
           "gap": 12
         },
         {
-          "id": "music-gap",
-          "type": "column",
-          "children": [],
-          "size": {
-            "px": 0
-          },
-          "min": 0
-        },
-        {
-          "id": "music",
-          "type": "block",
-          "content": {
-            "mod": "malfoid-music"
-          },
-          "size": {
-            "px": 0
-          },
-          "min": 0,
-          "background": {
-            "image": "mods/malfoid-chrome/sidebar-left.png",
-            "fit": "cover"
-          },
-          "radius": 14
-        },
-        {
           "id": "gap-footer",
           "type": "column",
           "children": [],
@@ -272,10 +247,30 @@
         },
         {
           "id": "status",
-          "type": "block",
-          "content": {
-            "mod": "malfoid-status"
-          },
+          "type": "row",
+          "children": [
+            {
+              "id": "status-main",
+              "type": "block",
+              "content": {
+                "mod": "malfoid-status"
+              },
+              "size": {
+                "weight": 1
+              }
+            },
+            {
+              "id": "music",
+              "type": "block",
+              "content": {
+                "mod": "malfoid-music"
+              },
+              "size": {
+                "px": 0
+              },
+              "min": 0
+            }
+          ],
           "size": {
             "px": 32
           },

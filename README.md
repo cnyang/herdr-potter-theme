@@ -8,7 +8,7 @@ Herdr 原生桌面主題，以 `malfoid/` 角色照片和「奇幻女巫角色�
 ## 畫面與狀態
 
 - 190px 側欄、60px Space 列搭配 48px 四學院徽章，以及四態角色卡；收合時改用頭像。
-- Islands 浮動卡片（參考 CodeyPacker/herdr-mods 的 islands）：畫布留 12px 邊、卡片間距 12px；Brand、Spaces、Agents、設定列、狀態列、右側面板各自是 14px 圓角、1px 邊框的獨立卡片；終端 pane 的底圖與終端底色由 Herdr 原生繪製、mod 蓋不住方角，所以 pane 圓角縮為 8px。分頁列無底色、分頁與按鈕為膠囊。Herdr 不會依節點圓角裁切 mod 的滿版底色，所以內建 `pane`、`workspace-status` 改用本主題的 `malfoid-pane`、`malfoid-status` clone；節點的底圖不吃 `radius`，所以各 mod 另外用 canvas 色粗框蓋住圖片的四個方角；Apple Music 區塊是獨立卡片，卡片前的 12px 空隙由 `music-gap` 節點跟著縮放，沒歌時不留白。macOS 紅黃綠按鈕位置由 root 的 `traffic_lights` 決定（以 zoom 1.2 對準 brand 卡片中心）。
+- Islands 浮動卡片（參考 CodeyPacker/herdr-mods 的 islands）：畫布留 12px 邊、卡片間距 12px；Brand、Spaces、Agents、設定列、狀態列、右側面板各自是 14px 圓角、1px 邊框的獨立卡片；終端 pane 的底圖與終端底色由 Herdr 原生繪製、mod 蓋不住方角，所以 pane 圓角縮為 8px。分頁列無底色、分頁與按鈕為膠囊。Herdr 不會依節點圓角裁切 mod 的滿版底色，所以內建 `pane`、`workspace-status` 改用本主題的 `malfoid-pane`、`malfoid-status` clone；節點的底圖不吃 `radius`，所以各 mod 另外用 canvas 色粗框蓋住圖片的四個方角；Apple Music 控制列放在底部狀態列右側（與狀態列同一張卡片，`music` 節點寬度隨有無曲目在 0 與 460px 間切換，沒歌時不佔位）。macOS 紅黃綠按鈕位置由 root 的 `traffic_lights` 決定（以 zoom 1.2 對準 brand 卡片中心）。
 - Spaces 與 Agents 各自為獨立卡片（不再用分隔線）；右側四種面板共用左側欄底圖，覆以半透明墨綠底色。
 - 閒置抱書、等待指示托球、完成微笑舉杖；工作中每 3 秒切換「施法中」「思考中」，文字與姿態同步，相鄰 agent 交錯顯示不同動作。
 - 工作姿態與其他狀態都使用 PNG，6 秒一輪；工作狀態燈以原生 opacity 動畫呼吸。
