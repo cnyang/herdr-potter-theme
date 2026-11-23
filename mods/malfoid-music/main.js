@@ -10,7 +10,7 @@
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import * as fs from "fs/promises";
-import { hc, appHome, readTextFile, watchFolder, theme, run, layout } from "herdr";
+import { exec, hc, appHome, readTextFile, watchFolder, theme, run, layout } from "herdr";
 import { SEEK_SECONDS, blockWidth, clock, hash, position } from "./lib.js";
 
 const NAME = "malfoid-music";
@@ -99,6 +99,9 @@ export default class MalfoidMusic extends View {
     cx.spawn(async () => { if (this.daemon && !(await this.daemonLive())) await this.startDaemon(); });
   }
 
+  // 點曲目區開啟 Music.app；`open -a` 對已開啟的 app 只會把它帶到前景。
+  openApp() { exec("/usr/bin/open", ["-a", "Music"]).catch(() => {}); }
+
   // 有東西可顯示時才佔空間。絕不 hide：被隱藏的區塊不會啟動 mod，daemon 也就永遠起不來。
   showBlock(px) {
     const node = find(layout(), BLOCK);
@@ -144,11 +147,15 @@ export default class MalfoidMusic extends View {
         .child(svg(ICON(icon)).size(12));
     };
     return box
-      .child(svg(ICON("music")).size(12).flex_none().text_color(s.paused ? t.dim : t.accent))
-      // 曲目：吃掉剩下的寬度，放不下就截斷（完整曲名在 tooltip）
-      .child(h_flex().flex_1().min_w(0).gap(6).items_center().tooltip(`${s.title} · ${s.artist}`)
-        .child(div().flex_shrink(1).min_w(0).truncate().text_color(s.paused ? t.muted : t.foreground).font_medium().child(s.title))
-        .child(div().flex_shrink(2).min_w(0).truncate().text_color(t.dim).child(s.artist)))
+      // 圖示＋曲目：吃掉剩下的寬度，放不下就截斷（完整曲名在 tooltip）；點一下開啟 Music.app
+      .child(h_flex().id(`${NAME}-open`).flex_1().min_w(0).gap(8).items_center().cursor_pointer()
+        .tooltip(`${s.title} · ${s.artist}`)
+        .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
+        .on_click(() => this.openApp())
+        .child(svg(ICON("music")).size(12).flex_none().text_color(s.paused ? t.dim : t.accent))
+        .child(h_flex().flex_1().min_w(0).gap(6).items_center()
+          .child(div().flex_shrink(1).min_w(0).truncate().text_color(s.paused ? t.muted : t.foreground).font_medium().child(s.title))
+          .child(div().flex_shrink(2).min_w(0).truncate().text_color(t.dim).child(s.artist))))
       // 時間：固定最小寬度，數字位數變動時按鈕不抖動
       .child(div().min_w(66).flex_none().text_size(11).text_right().text_color(t.dim).child(`${clock(position(s, Date.now()))} / ${clock(s.duration)}`))
       .child(h_flex().gap(4).items_center().children(CONTROLS.map(([id, icon, tip]) =>

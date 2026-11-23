@@ -325,6 +325,7 @@ test("music mod lives inside the status bar, ships its icons and keeps the crash
   assert.deepEqual([block.size.px, block.min], [0, 0]);
   const main = readFileSync(join(root, "mods/malfoid-music/main.js"), "utf8");
   assert.ok(main.includes('const BLOCK = "music"'), "mod must resize the layout block with this id");
+  assert.ok(main.includes('exec("/usr/bin/open", ["-a", "Music"])'), "clicking the track area must open Music.app");
   for (const icon of ["music", "skip-back", "rewind", "play", "pause", "fast-forward", "skip-forward"]) {
     assert.ok(existsSync(join(root, `mods/malfoid-music/${icon}.svg`)), icon);
     assert.ok(main.includes(`"${icon}"`), `${icon} unused`);
