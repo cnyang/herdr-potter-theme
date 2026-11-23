@@ -8,7 +8,7 @@ import { spawnSync } from "node:child_process";
 import { STATES, stateFor, spritePath, nextSidebarWidth, frameColor, iconKind, iconSrc, statusText, phaseOffset, ACTION_MS, SIDEBAR_WIDTH } from "../mods/malfoid-agents/lib.js";
 import { PORTRAITS, assignPortraits } from "../mods/malfoid-tabs/portraits.js";
 import { housePath } from "../mods/malfoid-spaces/houses.js";
-import { clock, hash, position, blockWidth } from "../mods/malfoid-music/lib.js";
+import { clock, hash, position } from "../mods/malfoid-music/lib.js";
 import { BACKGROUNDS, nextImage } from "../mods/malfoid-tabs/background.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -299,12 +299,6 @@ test("music clock reads m:ss and the position never runs past the track", () => 
   assert.equal(position({ ...s, duration: 0 }, 60000), 160, "a stream (duration 0) has no cap");
 });
 
-test("music block takes no room without a track and is narrower for the permission hint", () => {
-  assert.equal(blockWidth(null), 0);
-  assert.equal(blockWidth({ error: "denied" }), 220);
-  assert.equal(blockWidth({ title: "a" }), 460);
-});
-
 test("music daemon name hash is FNV-1a so an edited daemon.js gets a new terminal name", () => {
   assert.equal(hash(""), "811c9dc5");
   assert.equal(hash("a"), "e40c292c");
@@ -312,7 +306,7 @@ test("music daemon name hash is FNV-1a so an edited daemon.js gets a new termina
 });
 
 test("music mod lives inside the status bar, ships its icons and keeps the crash guards", () => {
-  // 狀態列版：status 是一整張卡片（底色、圓角、邊框都在這個 row 節點），左半是 status mod、右半是 music mod；沒歌時 music 寬 0。
+  // 狀態列版：status 是一整張卡片（底色、圓角、邊框都在這個 row 節點），左半是 status mod、右半是 music mod；music 固定寬 460，沒歌時顯示佔位。
   const layout = json("layouts/malfoid.json");
   const sidebar = layout.children.find(n => n.id === "sidebar");
   assert.deepEqual(sidebar.children.map(n => n.id), ["brand", "gap-brand", "sidebar-lists", "gap-footer", "sidebar-footer"]);
@@ -322,9 +316,8 @@ test("music mod lives inside the status bar, ships its icons and keeps the crash
   assert.equal(bar.children[0].content.mod, "malfoid-status");
   const block = bar.children[1];
   assert.equal(block.content.mod, "malfoid-music");
-  assert.deepEqual([block.size.px, block.min], [0, 0]);
+  assert.deepEqual([block.size.px, block.min], [460, 460]);
   const main = readFileSync(join(root, "mods/malfoid-music/main.js"), "utf8");
-  assert.ok(main.includes('const BLOCK = "music"'), "mod must resize the layout block with this id");
   assert.ok(main.includes('exec("/usr/bin/open", ["-a", "Music"])'), "clicking the track area must open Music.app");
   for (const icon of ["music", "skip-back", "rewind", "play", "pause", "fast-forward", "skip-forward"]) {
     assert.ok(existsSync(join(root, `mods/malfoid-music/${icon}.svg`)), icon);

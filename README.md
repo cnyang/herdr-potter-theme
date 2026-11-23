@@ -8,7 +8,7 @@ Herdr 原生桌面主題，以 `malfoid/` 角色照片和「奇幻女巫角色�
 ## 畫面與狀態
 
 - 190px 側欄、60px Space 列搭配 48px 四學院徽章，以及四態角色卡；收合時改用頭像。
-- Islands 浮動卡片（參考 CodeyPacker/herdr-mods 的 islands）：畫布留 12px 邊、卡片間距 12px；Brand、Spaces、Agents、設定列、狀態列、右側面板各自是 14px 圓角、1px 邊框的獨立卡片；終端 pane 的底圖與終端底色由 Herdr 原生繪製、mod 蓋不住方角，所以 pane 圓角縮為 8px。分頁列無底色、分頁與按鈕為膠囊。Herdr 不會依節點圓角裁切 mod 的滿版底色，所以內建 `pane`、`workspace-status` 改用本主題的 `malfoid-pane`、`malfoid-status` clone；節點的底圖不吃 `radius`，所以各 mod 另外用 canvas 色粗框蓋住圖片的四個方角；Apple Music 控制列放在底部狀態列右側（與狀態列同一張卡片，`music` 節點寬度隨有無曲目在 0 與 460px 間切換，沒歌時不佔位）。macOS 紅黃綠按鈕位置由 root 的 `traffic_lights` 決定（以 zoom 1.2 對準 brand 卡片中心）。
+- Islands 浮動卡片（參考 CodeyPacker/herdr-mods 的 islands）：畫布留 12px 邊、卡片間距 12px；Brand、Spaces、Agents、設定列、狀態列、右側面板各自是 14px 圓角、1px 邊框的獨立卡片；終端 pane 的底圖與終端底色由 Herdr 原生繪製、mod 蓋不住方角，所以 pane 圓角縮為 8px。分頁列無底色、分頁與按鈕為膠囊。Herdr 不會依節點圓角裁切 mod 的滿版底色，所以內建 `pane`、`workspace-status` 改用本主題的 `malfoid-pane`、`malfoid-status` clone；節點的底圖不吃 `radius`，所以各 mod 另外用 canvas 色粗框蓋住圖片的四個方角；Apple Music 控制列放在底部狀態列右側（與狀態列同一張卡片，`music` 節點固定 460px 寬，沒歌時顯示「Music 未播放」佔位）。macOS 紅黃綠按鈕位置由 root 的 `traffic_lights` 決定（以 zoom 1.2 對準 brand 卡片中心）。
 - Spaces 與 Agents 各自為獨立卡片（不再用分隔線）；右側四種面板共用左側欄底圖，覆以半透明墨綠底色。
 - 閒置抱書、等待指示托球、完成微笑舉杖；工作中每 3 秒切換「施法中」「思考中」，文字與姿態同步，相鄰 agent 交錯顯示不同動作。
 - 工作姿態與其他狀態都使用 PNG，6 秒一輪；工作狀態燈以原生 opacity 動畫呼吸。
@@ -84,7 +84,7 @@ herdr-app do layout.switch '{"name":"malfoid"}'
 - Spaces 沿用 Traveler 的 `git status`、`git rev-parse` 和 `hc machine ls` 查詢；遠端由 Herdr 既有連線執行。
 - Space 列顯示未提交檔案與未推送數量，不顯示「repo without a remote」提示。
 - Space 徽章按顯示順序循環：史萊哲林 → 葛來分多 → 雷文克勞 → 赫夫帕夫。主機標題與工作樹子列不計入徽章順序。
-- 側欄底部的 Apple Music 區塊（`malfoid-music`，僅 macOS）：沒歌時高度 0，有歌時長出曲名、時間、進度條與上一首／倒退 10 秒／播放暫停／快轉 10 秒／下一首。
+- 側欄底部的 Apple Music 區塊（`malfoid-music`，僅 macOS）：固定在狀態列右下角；沒歌時顯示「Music 未播放」，有歌時顯示曲名、時間與上一首／倒退 10 秒／播放暫停／快轉 10 秒／下一首。
   一個長駐 `osascript` daemon（herdr-core 終端 `apm-<雜湊>`）每秒讀 Music 並寫 `data/malfoid-music/state.json`，按鈕寫 `cmd.json`。
   第一次會跳出「允許控制 Music」的系統授權；若拒絕，區塊改顯示提示列，到系統設定 > 隱私權與安全性 > 自動化開啟。側欄收成窄條時區塊自動縮為 0。
 - 中央 pane 背景圖可輪播：把新圖放進 `mods/malfoid-chrome/`，路徑加進 `mods/malfoid-tabs/background.js` 的 `BACKGROUNDS`（預設一張，不換）；每 `ROTATE_MS`（10 分鐘）換下一張。

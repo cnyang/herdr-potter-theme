@@ -6,15 +6,14 @@
 // data/malfoid-music/state.json；本 mod 監看該資料夾（不輪詢），並以 data/malfoid-music/cmd.json 下指令。
 // 第一次使用時 macOS 會詢問是否允許控制 Music（系統設定 > 隱私權與安全性 > 自動化）。
 //
-// 沒歌時區塊寬度縮到 0 px，有歌時長回來；layout 裡的區塊 id 必須是 BLOCK。底色、圓角、邊框由外層 status 節點負責。
+// 區塊固定 460 px 寬（layout 的 music 節點），沒歌時顯示「未播放」佔位；底色、圓角、邊框由外層 status 節點負責。
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import * as fs from "fs/promises";
-import { exec, hc, appHome, readTextFile, watchFolder, theme, run, layout } from "herdr";
-import { SEEK_SECONDS, blockWidth, clock, hash, position } from "./lib.js";
+import { exec, hc, appHome, readTextFile, watchFolder, theme } from "herdr";
+import { SEEK_SECONDS, clock, hash, position } from "./lib.js";
 
 const NAME = "malfoid-music";
-const BLOCK = "music";
 const ICON = (name) => `mods/${NAME}/${name}.svg`;
 const home = () => appHome().replace(/\\/g, "/");
 const dataDir = () => `${home()}/data/${NAME}`;
@@ -27,15 +26,6 @@ const CONTROLS = [
   ["forward", "fast-forward", `Forward ${SEEK_SECONDS} s`],
   ["next", "skip-forward", "Next"],
 ];
-
-function find(node, id) {
-  if (node?.id === id) return node;
-  for (const c of node?.children ?? []) {
-    const f = find(c, id);
-    if (f) return f;
-  }
-  return null;
-}
 
 export default class MalfoidMusic extends View {
   init(_props, cx) {
@@ -82,11 +72,8 @@ export default class MalfoidMusic extends View {
     let s = null;
     try { s = JSON.parse((await readTextFile(`${dataDir()}/state.json`)) ?? "null"); } catch (_) { s = null; }
     this.state = s;
-    this.fit();
     cx.notify();
   }
-
-  fit() { this.showBlock(blockWidth(this.state)); }
 
   act(action, cx) {
     // 先在畫面上反應，daemon 下一次寫入會校正。
@@ -102,14 +89,6 @@ export default class MalfoidMusic extends View {
   // 點曲目區開啟 Music.app；`open -a` 對已開啟的 app 只會把它帶到前景。
   openApp() { exec("/usr/bin/open", ["-a", "Music"]).catch(() => {}); }
 
-  // 有東西可顯示時才佔空間。絕不 hide：被隱藏的區塊不會啟動 mod，daemon 也就永遠起不來。
-  showBlock(px) {
-    const node = find(layout(), BLOCK);
-    if (!node) return;
-    if (node.hidden) run("layout.show", { id: BLOCK });
-    if (node.size?.px !== px) run("layout.resize", { id: BLOCK, px });
-  }
-
   async daemonLive() {
     try {
       const ls = JSON.parse((await hc(["ls", "--json"])).stdout);
@@ -124,10 +103,17 @@ export default class MalfoidMusic extends View {
 
   render() {
     const t = theme(), s = this.state;
-    if (!s) return div().size_full();
     // 只排內容：底色由 status 節點畫；左邊 1px 線與狀態列左半隔開。
     const box = h_flex().id(NAME).size_full().px(10).gap(8).items_center().overflow_hidden()
       .border_l_1().border_color(t.border).text_size(12).text_color(t.muted);
+    // Music 沒開或沒在播：佔位，點一下開啟 Music.app
+    if (!s) {
+      return box.child(h_flex().id(`${NAME}-open`).flex_1().min_w(0).gap(8).items_center().cursor_pointer()
+        .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
+        .on_click(() => this.openApp())
+        .child(svg(ICON("music")).size(12).flex_none().text_color(t.dim))
+        .child(div().flex_1().min_w(0).truncate().text_size(11.5).text_color(t.dim).child("Music 未播放")));
+    }
     if (s.error === "denied") {
       return box
         .child(svg(ICON("music")).size(12).flex_none().text_color(t.dim))

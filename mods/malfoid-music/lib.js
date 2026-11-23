@@ -16,6 +16,3 @@ export function hash(s) {
 
 // 上次寫入的位置 + 經過的時間；暫停不動，不超過總長（直播 duration 為 0 則不設上限）。
 export const position = (s, now) => (s.paused ? s.seconds : Math.min(s.duration || Infinity, s.seconds + (now - s.at) / 1000));
-
-// 區塊寬度（狀態列右側）：沒歌 0、授權提示 220、播放中 460。
-export const blockWidth = (state) => (!state ? 0 : state.error ? 220 : 460);

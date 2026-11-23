@@ -266,9 +266,9 @@
                 "mod": "malfoid-music"
               },
               "size": {
-                "px": 0
+                "px": 460
               },
-              "min": 0
+              "min": 460
             }
           ],
           "size": {
