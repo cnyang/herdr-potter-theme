@@ -29,6 +29,7 @@ function location() {
 const key = () => JSON.stringify(location());
 const LANG = { ts: "js", tsx: "js", mts: "js", cts: "js", jsx: "js", mjs: "js", toml: "yaml", jsonc: "json", svelte: "html", vue: "html" };
 const PER_FOLDER = 500, TOTAL = 5000;
+const IMAGE = /\.(png|jpe?g|gif|webp|bmp|svg)$/i, PREVIEW_DIR = "data/files-preview", MAX_IMAGE = 20 * 1024 * 1024;
 const DIR = "mods/file-icons";
 
 // Material Icon Theme's rules, as VS Code applies them: names match case-insensitively; a
@@ -143,8 +144,9 @@ class Files extends View {
   }
 
   show(path, cx) {
-    this.code?.release(); this.code = null; this.file = path; this.fileError = null;
+    this.code?.release(); this.code = null; this.picture = null; this.file = path; this.fileError = null;
     if (!path || !cx) return;
+    if (IMAGE.test(path)) return this.showImage(path, cx);
     const context = this.context, root = this.root, on = this.on;
     cx.spawn(async cx => {
       try {
@@ -158,6 +160,24 @@ class Files extends View {
           font_family: settings().font_family, font_size: 12,
           syntax: { keyword: t.ansi5, string: t.ansi2, comment: t.dim, function: t.ansi4, type: t.ansi3, number: t.ansi1, constant: t.ansi6 } });
       } catch { if (this.file === path && key() === context) this.fileError = "Cannot preview this file (binary, too large, or unreadable)"; }
+      finally { cx.notify(); }
+    });
+  }
+
+  // image() 只讀 Herdr 家目錄的相對路徑，所以先把圖複製進 data/files-preview/ 再顯示。
+  // 每次換新檔名（序號），避免同路徑被圖片快取吃掉；複製前清掉舊預覽，目錄裡只留一張。
+  // ponytail: 遠端機器不支援（要先把位元組拉回來），需要時改用 exec(..., { on }) + base64。
+  showImage(path, cx) {
+    if (this.on) { this.fileError = "Remote image · no preview"; return; }
+    const context = this.context, src = `${this.root}/${path}`;
+    const name = `${PREVIEW_DIR}/${this.shots = (this.shots ?? 0) + 1}.${path.split(".").pop().toLowerCase()}`;
+    cx.spawn(async cx => {
+      try {
+        const r = await exec("sh", ["-c", 'd="$HOME/.config/herdr-app/$2"; [ $(( $(wc -c < "$1") )) -le "$3" ] || exit 2; mkdir -p "${d%/*}" && rm -f "${d%/*}"/* && cp "$1" "$d"', "files", src, name, String(MAX_IMAGE)]);
+        if (this.file !== path || key() !== context) return;
+        if (r.code === 0) this.picture = name;
+        else this.fileError = r.code === 2 ? "Image too large to preview (over 20 MB)" : "Cannot preview this image";
+      } catch { if (this.file === path && key() === context) this.fileError = "Cannot preview this image"; }
       finally { cx.notify(); }
     });
   }
@@ -194,7 +214,7 @@ class Files extends View {
       .when(!this.file, el => el.child(v_flex().id("files-tree").flex_1().min_h(0).overflow_y_scrollbar().p(6).children(this.rows("", 0, [], t, dark))
         .when(Boolean(this.error) || !this.entries.get("")?.length, el => el.child(div().p(8).text_size(12).text_color(t.dim).child(this.error || (this.loading ? "Loading files…" : this.root ? "No files" : "No folder"))))
         .when(this.limited, el => el.child(div().p(8).text_size(11).text_color(t.dim).child("File list limited to 500 entries per folder and 5,000 total")))))
-      .when(Boolean(this.file), el => el.child(this.code ? Editor.new(this.code).flex_1().min_h(0) : div().p(12).text_color(t.dim).child(this.fileError || "Loading file…")));
+      .when(Boolean(this.file), el => el.child(this.picture ? div().flex_1().min_h(0).p(8).child(image(this.picture).size_full()) : this.code ? Editor.new(this.code).flex_1().min_h(0) : div().p(12).text_color(t.dim).child(this.fileError || "Loading file…")));
   }
 }
 
