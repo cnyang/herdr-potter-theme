@@ -3,7 +3,7 @@
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import { spaces, agents, theme, run, window, keys, exec } from "herdr";
-import { SAMPLE_SH, parseSample, netRate, fmtRate, TEAMS_PY, parseTeams, DISCORD_AS, parseDiscord } from "./lib.js";
+import { SAMPLE_SH, parseSample, netRate, fmtRate, TEAMS_PY, parseTeams, DISCORD_JXA, parseDiscord } from "./lib.js";
 
 const SAMPLE_MS = 3000; // 取樣間隔；一次取樣約 1.7 秒（top 要抽兩次樣）
 const TEAMS_MS = 10000; // Zen 約 15 秒才寫一次 session store，抽得比這更密沒有意義
@@ -20,7 +20,7 @@ export default class WorkspaceStatus extends View {
     this.teamsBusy = false;
     this.sampleTeams(cx);
     cx.timer.every(TEAMS_MS, (cx) => this.sampleTeams(cx));
-    this.discord = null; // { mentions, unread }；沒有 Discord 分頁、Chrome 沒開、自動化權限被拒就是 null，狀態列不顯示
+    this.discord = null; // { mentions, unread }；只有自動化權限被拒／osascript 失敗才是 null（不顯示）；沒有 Discord 分頁或 Chrome 沒開是灰字
     this.discordBusy = false;
     this.sampleDiscord(cx);
     cx.timer.every(DISCORD_MS, (cx) => this.sampleDiscord(cx));
@@ -32,9 +32,9 @@ export default class WorkspaceStatus extends View {
     this.discordBusy = true;
     cx.spawn(async (cx) => {
       try {
-        this.discord = parseDiscord((await exec("osascript", ["-e", DISCORD_AS], { timeout: 8000 })).stdout);
+        this.discord = parseDiscord((await exec("osascript", ["-l", "JavaScript", "-e", DISCORD_JXA], { timeout: 8000 })).stdout);
       } catch {
-        this.discord = null; // 權限被拒、沒裝 Chrome：寧可不顯示
+        this.discord = null; // 權限被拒、沒裝 Chrome、osascript 失敗：寧可不顯示
       } finally {
         this.discordBusy = false;
         cx.notify();
