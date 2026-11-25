@@ -31,6 +31,7 @@ class MalfoidNotes extends View {
     this.area = TextareaState.new({ placeholder: "Write markdown…" });
     this.ready = false; // 讀檔成功前不准存檔，否則讀失敗時空白內容會蓋掉原本的筆記
     this.preview = false;
+    this.handle = cx.focus_handle(); // 根節點接 key 事件用：Esc 要穿過輸入框冒泡上來
     this.err = null;
     this.saving = false;
     this.area.on("change", () => { this.s.text = this.area.value(); });
@@ -66,6 +67,14 @@ class MalfoidNotes extends View {
     if (this.err !== before) cx.notify();
   }
 
+  // 切到 Preview：立刻存檔，並把鍵盤焦點從輸入框移到根節點（否則再按 Esc 沒人接）
+  showPreview(cx) {
+    this.preview = true;
+    this.handle.focus();
+    cx.notify();
+    cx.spawn((cx) => this.flush(cx));
+  }
+
   mode(t, id, label, on, action) {
     return div().id(`note-${id}`).h(24).px(9).rounded(5).flex().items_center().text_size(12)
       .bg(on ? t.selected : t.chrome).text_color(on ? t.foreground : t.muted)
@@ -86,11 +95,15 @@ class MalfoidNotes extends View {
     } else {
       body = Textarea.new(this.area).flex_1().min_h(0).w_full().p(14).text_size(13).text_color(t.foreground);
     }
-    return v_flex().id("notes").size_full().min_h(0).rounded(14).overflow_hidden().bg(`${t.chrome}99`).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
+    return v_flex().id("notes").size_full().min_h(0).rounded(14).overflow_hidden().bg(`${t.chrome}99`).border_1().border_color(t.border).text_color(t.foreground).text_size(13).track_focus(this.handle)
+      .on_key_down((e, cx) => {
+        // Edit 模式按 Esc 自動回 Preview；讀檔完成前不動作
+        if (e.key === "escape" && this.ready && !this.preview) { this.showPreview(cx); cx.stop_propagation(); }
+      })
       .child(h_flex().h(38).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
         .child(div().flex_1().font_semibold().child("Note"))
         .child(this.mode(t, "edit", "Edit", !this.preview, (_e, cx) => { this.preview = false; this.area.focus(); cx.notify(); }))
-        .child(this.mode(t, "preview", "Preview", this.preview, (_e, cx) => { this.preview = true; cx.notify(); cx.spawn((cx) => this.flush(cx)); })))
+        .child(this.mode(t, "preview", "Preview", this.preview, (_e, cx) => this.showPreview(cx))))
       .child(body)
       .when(Boolean(this.err && this.ready), (el) => el.child(div().flex_none().px(14).py(6).text_size(11).text_color(t.blocked).child(this.err)));
   }

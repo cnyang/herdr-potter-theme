@@ -60,4 +60,6 @@ test("notes panel is wired: layout block, mod title, tab button state and the sh
   assert.ok(main.includes("data/theme-notes"), "Malfoid and Husky share one note file");
   // 讀檔失敗時 ready 必須維持 false，flush 才不會把空白內容寫回去蓋掉筆記。
   assert.match(main, /if \(!this\.ready \|\| this\.saving\) return/);
+  // Edit 模式按 Esc 要回 Preview（根節點接 key 事件，Esc 從輸入框冒泡上來）。
+  assert.match(main, /e\.key === "escape" && this\.ready && !this\.preview/);
 });
