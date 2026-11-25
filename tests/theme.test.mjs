@@ -166,7 +166,7 @@ test("background rotation walks the list, wraps, and restarts from the first whe
 });
 
 test("each panel shows its room icon in full color when empty, never over an error", () => {
-  const panels = { "malfoid-files/main.js": "library", "malfoid-changes/main.js": "potions","malfoid-git-graph/graph.js": "observatory" };
+  const panels = { "malfoid-files/main.js": "library" };
   for (const [file, art] of Object.entries(panels)) {
     const path = `mods/malfoid-spaces/art/${art}.svg`;
     assert.ok(existsSync(join(root, path)), path);
@@ -175,12 +175,11 @@ test("each panel shows its room icon in full color when empty, never over an err
     assert.ok(source.includes(`image("${path}").size(72)`), file);
     assert.match(source, /\.when\((?:!this\.error|!failed), [^\n]*\.svg"\)/, file);
   }
-  assert.match(readFileSync(join(root, "mods/malfoid-changes/main.js"), "utf8"), /\? 132 :/, "Changes list must be tall enough for the icon");
 });
 
 test("panel buttons use bold 24px icons drawn for small sizes", () => {
   const tabs = readFileSync(join(root, "mods/malfoid-tabs/main.js"), "utf8");
-  for (const [id, label] of Object.entries({ files: "Files", changes: "Changes", graph: "Git", lyrics: "Lyrics", notes: "Note", calendar: "Calendar" })) {
+  for (const [id, label] of Object.entries({ files: "Files", lyrics: "Lyrics", notes: "Note", calendar: "Calendar" })) {
     const path = `mods/malfoid-tabs/art/panel-${id}.svg`;
     assert.ok(tabs.includes(`panelButton("${id}", "${label}", "${path}")`), id);
     const icon = readFileSync(join(root, path), "utf8");
@@ -242,21 +241,21 @@ test("installer refuses missing dependencies and name collisions before copying"
       mkdirSync(join(target, "mods", name), { recursive: true });
       writeFileSync(join(target, "mods", name, "main.js"), "fixture");
     };
-    for (const name of ["pane", "files", "changes", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "git-graph"]) fixture(name);
+    for (const name of ["pane", "files", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome"]) fixture(name);
     // file-icons 隨主題附帶，不是前置依賴：全新機器沒有它也要能一併裝好
     assert.ok(!existsSync(join(target, "mods/file-icons")));
     const result = install();
     assert.equal(result.status, 0, result.stderr);
     assert.ok(existsSync(join(target, "themes/malfoid.json")));
     assert.ok(existsSync(join(target, "mods/file-icons/icons/folder.svg")));
-    for (const name of ["agents", "tabs", "spaces", "chrome", "files", "changes", "git-graph", "music", "lyrics", "notes", "calendar"]) {
+    for (const name of ["agents", "tabs", "spaces", "chrome", "files", "music", "lyrics", "notes", "calendar"]) {
       assert.ok(existsSync(join(target, `mods/malfoid-${name}/main.js`)), name);
     }
     const file = join(target, "mods/malfoid-agents/main.js");
     writeFileSync(file, "user edit");
     assert.notEqual(install().status, 0);
     assert.equal(readFileSync(file, "utf8"), "user edit");
-    const other = join(target, "mods/git-graph/main.js");
+    const other = join(target, "mods/files/main.js");
     const update = spawnSync(process.execPath, [join(root, "scripts/install.mjs"), "--update"], { env: { ...process.env, HERDR_APP_HOME: target }, encoding: "utf8" });
     assert.equal(update.status, 0, update.stderr);
     assert.equal(readFileSync(file, "utf8"), readFileSync(join(root, "mods/malfoid-agents/main.js"), "utf8"));
@@ -269,7 +268,7 @@ test("installer keeps an existing file-icons unless --update", () => {
   const target = mkdtempSync(join(tmpdir(), "herdr-malfoid-icons-"));
   const run = (...args) => spawnSync(process.execPath, [join(root, "scripts/install.mjs"), ...args], { env: { ...process.env, HERDR_APP_HOME: target }, encoding: "utf8" });
   try {
-    for (const name of ["pane", "files", "changes", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "git-graph", "file-icons"]) {
+    for (const name of ["pane", "files", "changes", "workspace-status", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "file-icons"]) {
       mkdirSync(join(target, "mods", name), { recursive: true });
       writeFileSync(join(target, "mods", name, "main.js"), "fixture");
     }

@@ -191,20 +191,6 @@
                       }
                     },
                     {
-                      "id": "changes",
-                      "type": "block",
-                      "content": {
-                        "mod": "malfoid-changes"
-                      }
-                    },
-                    {
-                      "id": "graph",
-                      "type": "block",
-                      "content": {
-                        "mod": "malfoid-git-graph"
-                      }
-                    },
-                    {
                       "id": "lyrics",
                       "type": "block",
                       "content": {

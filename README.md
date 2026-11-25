@@ -12,8 +12,8 @@ Herdr 原生桌面主題，以 `malfoid/` 角色照片和「奇幻女巫角色�
 - Spaces 與 Agents 各自為獨立卡片（不再用分隔線）；右側四種面板共用左側欄底圖，覆以半透明墨綠底色。
 - 閒置抱書、等待指示托球、完成微笑舉杖；工作中每 3 秒切換「施法中」「思考中」，文字與姿態同步，相鄰 agent 交錯顯示不同動作。
 - 工作姿態與其他狀態都使用 PNG，6 秒一輪；工作狀態燈以原生 opacity 動畫呼吸。
-- 所有分頁均隨機分配角色頭像，包含一般終端與非 AI 程式；配圖按 Tab ID 保存，10 張用完才重複。Files／Changes／Git 面板沿用本機既有操作。
-- Files／Changes／Git 面板空狀態使用 72px 全彩房間圖示：書本、魔藥、天文台。
+- 所有分頁均隨機分配角色頭像，包含一般終端與非 AI 程式；配圖按 Tab ID 保存，10 張用完才重複。Files 面板沿用本機既有操作。
+- Files 面板空狀態使用 72px 全彩房間圖示：書本。
 - 終端背景使用新完成的寬版哥德式走廊圖，以 `cover` 滿版顯示；終端底色不透明度為 0.35。
 
 | 用途 | 色碼 |
@@ -38,8 +38,6 @@ herdr-app check mods/malfoid-tabs
 herdr-app check mods/malfoid-spaces
 herdr-app check mods/malfoid-chrome
 herdr-app check mods/malfoid-files
-herdr-app check mods/malfoid-changes
-herdr-app check mods/malfoid-git-graph
 herdr-app check mods/malfoid-music
 herdr-app check mods/malfoid-lyrics
 herdr-app check mods/malfoid-notes
@@ -50,8 +48,7 @@ herdr-app check mods/malfoid-notes
 
 ## 安裝與切換
 
-這版配合目前本機 Herdr 0.1.13，依賴已安裝的 `git-graph`，
-以及 Herdr 內建的 pane、files、changes、workspace-status、menu、new-menu、picker、machine-add、workspace-chrome。
+這版配合目前本機 Herdr 0.1.13，依賴 Herdr 內建的 pane、files、workspace-status、menu、new-menu、picker、machine-add、workspace-chrome。
 Files 面板使用隨附的 `mods/file-icons`（來自 herdr-mods，Material Icon Theme 圖示）：機器上已有就保留，`--update` 才覆蓋。
 
 ```sh
@@ -68,8 +65,6 @@ herdr-app check ~/.config/herdr-app/mods/malfoid-tabs
 herdr-app check ~/.config/herdr-app/mods/malfoid-spaces
 herdr-app check ~/.config/herdr-app/mods/malfoid-chrome
 herdr-app check ~/.config/herdr-app/mods/malfoid-files
-herdr-app check ~/.config/herdr-app/mods/malfoid-changes
-herdr-app check ~/.config/herdr-app/mods/malfoid-git-graph
 herdr-app check ~/.config/herdr-app/mods/malfoid-music
 herdr-app check ~/.config/herdr-app/mods/malfoid-lyrics
 herdr-app check ~/.config/herdr-app/mods/malfoid-notes

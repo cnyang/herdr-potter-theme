@@ -108,7 +108,7 @@ export default class Tabs extends View {
       ? Math.max(10, (root.traffic_lights[0] + 64) / settings().zoom - (sidebar?.hidden ? 0 : sidebar?.size?.px ?? 0))
       : 10;
     const panel = find(root, "panel"), body = find(root, "panel-body");
-    const enabled = [...(shared("workspace.panels") ?? ["files", "changes"]), "graph", "lyrics", "notes", "calendar"];
+    const enabled = [...(shared("workspace.panels") ?? ["files"]).filter(id => id !== "changes"), "lyrics", "notes", "calendar"];
     this.syncPanel(space, panel, body, enabled);
     // 工具列專用 24px 粗線圖示，用 image() 保留金色。
     const panelButton = (id, label, icon) => {
@@ -129,8 +129,6 @@ export default class Tabs extends View {
       .child(h_flex().id("tab-scroll").flex_1().min_w(0).h_full().items_center().gap(3).overflow_x_scrollbar().children(shown.map(item)))
       .child(button("tab-new", "+", () => openOverlay({ mod: "new-menu", kind: "popup", width: 250, height: 512 }), true))
       .when(enabled.includes("files"), el => el.child(panelButton("files", "Files", "mods/malfoid-tabs/art/panel-files.svg")))
-      .when(enabled.includes("changes"), el => el.child(panelButton("changes", "Changes", "mods/malfoid-tabs/art/panel-changes.svg")))
-      .child(panelButton("graph", "Git", "mods/malfoid-tabs/art/panel-graph.svg"))
       .child(panelButton("lyrics", "Lyrics", "mods/malfoid-tabs/art/panel-lyrics.svg"))
       .child(panelButton("notes", "Note", "mods/malfoid-tabs/art/panel-notes.svg"))
       .child(panelButton("calendar", "Calendar", "mods/malfoid-tabs/art/panel-calendar.svg"))

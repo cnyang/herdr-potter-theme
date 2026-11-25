@@ -7,13 +7,13 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const target = process.env.HERDR_APP_HOME || join(homedir(), ".config", "herdr-app");
 const files = [
   "mods/malfoid-agents", "mods/malfoid-tabs", "mods/malfoid-spaces", "mods/malfoid-chrome",
-  "mods/malfoid-files", "mods/malfoid-changes", "mods/malfoid-git-graph",
+  "mods/malfoid-files",
   "mods/malfoid-music", "mods/malfoid-lyrics", "mods/malfoid-notes", "mods/malfoid-calendar", "mods/malfoid-pane", "mods/malfoid-status", "mods/file-icons", "layouts/malfoid.json", "layouts/malfoid.svg", "themes/malfoid.json",
 ];
 const update = process.argv.includes("--update");
 // file-icons 與其他主題共用：已存在就保留（不算撞名），只有 --update 才覆蓋
 const shared = ["mods/file-icons"];
-const dependencies = ["files", "changes", "menu", "new-menu", "picker", "machine-add", "workspace-chrome", "git-graph"];
+const dependencies = ["files", "menu", "new-menu", "picker", "machine-add", "workspace-chrome"];
 
 // 完整預檢後才複製；撞名預設停止，避免覆蓋個人主題或設定。
 // --update 只覆寫上面列出的 malfoid 路徑，供已安裝者更新；來源已刪的檔案不會移除。

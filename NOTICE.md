@@ -19,12 +19,9 @@ The character strip and academy background were created with the built-in
 imagegen tool using the supplied images as references; see `artwork/prompts.md`.
 No claim to third-party names, insignia or source-image rights is made here.
 
-The themed Files and Changes panels are modified copies of Herdr's built-in
-modules. The themed Git Graph is a modified copy of the locally installed
-https://github.com/rabeeh-ta/herdr-git-graph; it retains its upstream terms and
-bundled Lucide icon notice. These copies change asset paths and the panel root
-background only. Git Graph dialogs and shared settings continue to use the
-existing git-graph module. The original installed modules remain separate.
+The themed Files panel is a modified copy of Herdr's built-in module. It changes
+asset paths and the panel root background only. The original installed module
+remains separate.
 
 `mods/malfoid-music` is modified from the yt-music mod of
 https://github.com/cybertron288/herdr-mods/tree/main/yt-music (MIT, Copyright (c) 2026
